@@ -1,0 +1,11 @@
+.env
+node_modules/
+dist/
+target/
+.idea/
+.vscode/
+*.log
+.classpath
+.project
+.settings/
+bin/

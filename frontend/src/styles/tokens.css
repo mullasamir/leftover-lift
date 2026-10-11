@@ -1,0 +1,48 @@
+/*
+  Leftover Lift design tokens.
+  Palette is named after what's in the basket, not after its role.
+*/
+:root {
+  --oat: #f1e8d4;          /* page paper */
+  --oat-deep: #e5d9bd;     /* sunken surfaces, chips */
+  --linen: #fbf7ec;        /* tickets and inputs: lighter than the page */
+  --moss: #2f4a33;         /* primary: buttons, dark bands */
+  --moss-ink: #1e2d21;     /* body text */
+  --fern: #6e8f4e;         /* secondary green, success, path lines */
+  --marigold: #e8a93a;     /* highlight: focus, stickers, price */
+  --beet: #9a3550;         /* urgency: closing soon, errors */
+
+  --text: var(--moss-ink);
+  --text-soft: #4d5b4f;
+  --line: rgba(30, 45, 33, 0.22);
+
+  --font-display: 'Young Serif', Georgia, 'Times New Roman', serif;
+  --font-body: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-hand: 'Caveat', 'Bradley Hand', cursive;
+
+  /* Type scale: 1.25 ratio, fluid at the top end */
+  --step--1: 0.84rem;
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-2: 1.56rem;
+  --step-3: clamp(1.95rem, 1.5rem + 2vw, 2.6rem);
+  --step-4: clamp(2.5rem, 1.7rem + 4vw, 4.1rem);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+
+  /* Leaf-shaped corners for primary actions, gentle wobble for fields */
+  --radius-leaf: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  --radius-field: 14px 10px 16px 10px;
+  --radius-ticket: 18px 14px 20px 14px;
+
+  --measure: 62ch;
+  --page-pad: clamp(1rem, 4vw, 2.5rem);
+  --page-max: 1120px;
+}
