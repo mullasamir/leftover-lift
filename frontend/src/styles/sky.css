@@ -1,0 +1,68 @@
+/*
+  The sky. JavaScript only writes one number, --p (0 at the top of the page, 1 at the bottom).
+  Everything else (colour, sun, moon, stars, clouds) is pure CSS reacting to it.
+*/
+.sky {
+  position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
+  --orb: clamp(84px, 13vw, 150px);
+  background: linear-gradient(180deg, #ffefc2 0%, #ffc58b 28%, #f59cb0 55%, #7a4e9c 78%, #2b2358 100%);
+  background-size: 100% 400%;
+  background-position: 0 calc(var(--p, 0) * 100%);
+}
+
+.sky__sun, .sky__moon { position: absolute; width: var(--orb); height: var(--orb); border-radius: 50%; will-change: left, top, opacity; }
+
+.sky__sun {
+  left: calc(14% + var(--p, 0) * 64%);
+  top: calc(8% + var(--p, 0) * 50%);
+  background: radial-gradient(circle at 35% 32%, #fff3b0, #ffb02e 58%, #ff8a1f);
+  box-shadow: 0 0 0 calc(var(--orb) * 0.14) rgba(255, 176, 46, 0.28), 0 0 calc(var(--orb) * 0.9) rgba(255, 176, 46, 0.55);
+  opacity: clamp(0, calc((0.62 - var(--p, 0)) * 6), 1);
+}
+
+.sky__moon {
+  left: calc(78% - (var(--p, 0) - 0.45) * 60%);
+  top: calc(50% - (var(--p, 0) - 0.45) * 82%);
+  background: radial-gradient(circle at 35% 32%, #fffdf2, #efe9d0 70%);
+  box-shadow: 0 0 calc(var(--orb) * 0.7) rgba(255, 248, 220, 0.45);
+  opacity: clamp(0, calc((var(--p, 0) - 0.5) * 6), 1);
+}
+.sky__moon::before, .sky__moon::after { content: ''; position: absolute; border-radius: 50%; background: rgba(150, 140, 120, 0.22); }
+.sky__moon::before { width: 22%; height: 22%; left: 24%; top: 30%; }
+.sky__moon::after { width: 14%; height: 14%; left: 58%; top: 56%; }
+
+.sky__stars { position: absolute; inset: 0; opacity: clamp(0, calc((var(--p, 0) - 0.55) * 3.5), 1); }
+.sky__stars span { position: absolute; border-radius: 50%; background: #fff; animation: twinkle 3.4s ease-in-out infinite; }
+@keyframes twinkle { 50% { opacity: 0.25; transform: scale(0.7); } }
+
+.sky__cloud {
+  position: absolute; left: 0; height: 2.4rem; width: 8rem; border-radius: 999px; background: rgba(255, 255, 255, 0.55);
+  opacity: clamp(0, calc((0.6 - var(--p, 0)) * 3), 1);
+  animation: drift 120s linear infinite; animation-delay: var(--delay, 0s);
+}
+.sky__cloud::before, .sky__cloud::after { content: ''; position: absolute; background: inherit; border-radius: 50%; }
+.sky__cloud::before { width: 3.4rem; height: 3.4rem; left: 1.2rem; top: -1.5rem; }
+.sky__cloud::after { width: 2.6rem; height: 2.6rem; left: 4rem; top: -1rem; }
+.sky__cloud--a { top: 16%; --delay: -20s; }
+.sky__cloud--b { top: 34%; --delay: -70s; transform: scale(1.4); animation-duration: 160s; }
+.sky__cloud--c { top: 52%; --delay: -100s; transform: scale(0.8); animation-duration: 100s; }
+@keyframes drift { from { translate: -20vw 0; } to { translate: 115vw 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .sky__stars span, .sky__cloud { animation: none; }
+}
+
+/* Floating clock that follows the sky */
+.sky-clock {
+  position: fixed; left: 1.25rem; bottom: 1.25rem; z-index: 20; pointer-events: none;
+  display: none; align-items: center; gap: 0.55rem; padding: 0.45rem 0.9rem 0.45rem 0.7rem;
+  background: rgba(255, 251, 242, 0.92); border: 2px solid var(--ink); border-radius: 999px;
+  font-size: 0.82rem; line-height: 1.2; box-shadow: 0 4px 0 rgba(43, 35, 88, 0.2);
+}
+.sky-clock strong { font-family: var(--font-display); font-weight: 400; font-size: 1rem; }
+.sky-clock__dot { width: 0.65rem; height: 0.65rem; border-radius: 50%; background: var(--tomato); animation: pulse 1.6s ease-in-out infinite; }
+.sky-clock__mood { color: var(--ink-soft); }
+/* On phones the chip would cover cards and buttons, and the sky already tells the story. */
+@media (min-width: 48rem) { .sky-clock { display: inline-flex; } }
+@keyframes pulse { 50% { transform: scale(1.5); opacity: 0.5; } }
+@media (prefers-reduced-motion: reduce) { .sky-clock__dot { animation: none; } }
