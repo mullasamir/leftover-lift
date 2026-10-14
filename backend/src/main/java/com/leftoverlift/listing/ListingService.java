@@ -4,6 +4,7 @@ import com.leftoverlift.common.ApiException;
 import com.leftoverlift.common.PageResponse;
 import com.leftoverlift.listing.dto.ListingRequest;
 import com.leftoverlift.listing.dto.ListingResponse;
+import com.leftoverlift.reservation.ReservationRepository;
 import com.leftoverlift.user.User;
 import com.leftoverlift.user.VendorProfile;
 import com.leftoverlift.user.VendorProfileRepository;
@@ -32,11 +33,14 @@ public class ListingService {
 
     private final ListingRepository listings;
     private final VendorProfileRepository vendors;
+    private final ReservationRepository reservations;
     private final Clock clock;
 
-    public ListingService(ListingRepository listings, VendorProfileRepository vendors, Clock clock) {
+    public ListingService(ListingRepository listings, VendorProfileRepository vendors,
+                          ReservationRepository reservations, Clock clock) {
         this.listings = listings;
         this.vendors = vendors;
+        this.reservations = reservations;
         this.clock = clock;
     }
 
@@ -87,6 +91,7 @@ public class ListingService {
             throw ApiException.conflict("LISTING_NOT_CANCELLABLE", "This listing has already ended.");
         }
         listing.setStatus(ListingStatus.CANCELLED);
+        reservations.cancelActiveForListing(listing.getId()); // nobody is left holding food that is no longer offered
         return ListingResponse.from(listing);
     }
 

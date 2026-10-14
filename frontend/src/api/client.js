@@ -101,7 +101,15 @@ export const api = {
     get: (id) => request(`/listings/${id}`),
   },
 
+  reservations: {
+    create: (listingId, quantity) => request('/reservations', { method: 'POST', body: { listingId, quantity } }),
+    mine: () => request('/reservations?size=50'),
+    cancel: (id) => request(`/reservations/${id}/cancel`, { method: 'POST' }),
+  },
+
   vendor: {
+    waiting: () => request('/vendor/reservations'),
+    collect: (pickupCode) => request('/vendor/reservations/collect', { method: 'POST', body: { pickupCode } }),
     list: () => request('/vendor/listings?size=50'),
     get: (id) => request(`/vendor/listings/${id}`),
     create: (body) => request('/vendor/listings', { method: 'POST', body }),

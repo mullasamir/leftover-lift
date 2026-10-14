@@ -33,6 +33,7 @@ export default function Account() {
 
       <div>
         <div className="account__actions">
+          {user.role === 'CONSUMER' && <Link to="/rescues" className="btn">See my rescues</Link>}
           {user.role === 'VENDOR' && <Link to="/vendor" className="btn">Manage my listings</Link>}
           {user.role === 'ADMIN' && <Link to="/admin" className="btn">Open admin dashboard</Link>}
           <button className="btn btn--ghost" onClick={async () => { await logout(); navigate('/') }}>Sign out</button>

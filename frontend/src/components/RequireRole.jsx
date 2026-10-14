@@ -1,7 +1,7 @@
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 
-const AUDIENCE = { VENDOR: 'businesses', ADMIN: 'administrators' }
+const AUDIENCE = { VENDOR: 'businesses', ADMIN: 'administrators', CONSUMER: 'customers' }
 
 /** Sends signed-out visitors to sign in, and tells signed-in people kindly when an area is not for their account type. */
 export default function RequireRole({ role, children }) {

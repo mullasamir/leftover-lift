@@ -10,6 +10,7 @@ import Account from './pages/Account.jsx'
 import VendorDashboard from './pages/VendorDashboard.jsx'
 import ListingForm from './pages/ListingForm.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
+import MyRescues from './pages/MyRescues.jsx'
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
         <Route path="account" element={<RequireAuth><Account /></RequireAuth>} />
+        <Route path="rescues" element={<RequireRole role="CONSUMER"><MyRescues /></RequireRole>} />
         <Route path="vendor" element={<RequireRole role="VENDOR"><VendorDashboard /></RequireRole>} />
         <Route path="vendor/new" element={<RequireRole role="VENDOR"><ListingForm /></RequireRole>} />
         <Route path="vendor/:id/edit" element={<RequireRole role="VENDOR"><ListingForm /></RequireRole>} />

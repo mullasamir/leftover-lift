@@ -73,10 +73,10 @@ export default function AdminDashboard() {
 
       {stats && (
         <div className="stats stats--admin">
-          <p className="stat"><strong>{stats.totalUsers}</strong><span>total accounts</span></p>
           <p className="stat"><strong>{stats.usersByRole.CONSUMER ?? 0}</strong><span>customers</span></p>
           <p className="stat"><strong>{stats.usersByRole.VENDOR ?? 0}</strong><span>businesses</span></p>
           <p className="stat"><strong>{live}</strong><span>live listings</span></p>
+          <p className="stat"><strong>{stats.portionsRescued ?? 0}</strong><span>portions rescued</span></p>
         </div>
       )}
 

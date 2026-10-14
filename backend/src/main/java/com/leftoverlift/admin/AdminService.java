@@ -7,6 +7,8 @@ import com.leftoverlift.common.ApiException;
 import com.leftoverlift.common.PageResponse;
 import com.leftoverlift.listing.ListingRepository;
 import com.leftoverlift.listing.ListingStatus;
+import com.leftoverlift.reservation.ReservationRepository;
+import com.leftoverlift.reservation.ReservationStatus;
 import com.leftoverlift.user.Role;
 import com.leftoverlift.user.User;
 import com.leftoverlift.user.UserRepository;
@@ -26,11 +28,14 @@ public class AdminService {
 
     private final UserRepository users;
     private final ListingRepository listings;
+    private final ReservationRepository reservations;
     private final RefreshTokenService refreshTokens;
 
-    public AdminService(UserRepository users, ListingRepository listings, RefreshTokenService refreshTokens) {
+    public AdminService(UserRepository users, ListingRepository listings, ReservationRepository reservations,
+                        RefreshTokenService refreshTokens) {
         this.users = users;
         this.listings = listings;
+        this.reservations = reservations;
         this.refreshTokens = refreshTokens;
     }
 
@@ -79,6 +84,11 @@ public class AdminService {
         for (ListingStatus status : ListingStatus.values()) {
             byStatus.put(status, listings.countByStatus(status));
         }
-        return new AdminStatsResponse(total, byRole, byStatus);
+        Map<ReservationStatus, Long> byReservation = new EnumMap<>(ReservationStatus.class);
+        for (ReservationStatus status : ReservationStatus.values()) {
+            byReservation.put(status, reservations.countByStatus(status));
+        }
+        long rescued = reservations.sumQuantityByStatus(ReservationStatus.COLLECTED);
+        return new AdminStatsResponse(total, byRole, byStatus, byReservation, rescued);
     }
 }

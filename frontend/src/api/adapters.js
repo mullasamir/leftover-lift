@@ -32,6 +32,7 @@ export function toCardListing(l) {
     category: l.category.toLowerCase(),
     vendor: l.vendor.businessName,
     place: l.vendor.city,
+    address: l.vendor.address,
     title: l.title,
     detail: l.description,
     tags: (l.dietaryTags ?? []).map((t) => TAG_LABELS[t] ?? t),

@@ -67,6 +67,11 @@ Demo accounts are `crumb@`, `saffron@`, `loom@` and `greenbasket@` `demo.leftove
 | POST | `/api/v1/vendor/listings` | business | Post surplus food |
 | PUT | `/api/v1/vendor/listings/{id}` | business | Edit my listing |
 | POST | `/api/v1/vendor/listings/{id}/cancel` | business | Cancel my listing |
+| POST | `/api/v1/reservations` | customer | Reserve 1 to 3 portions, returns a pickup code |
+| GET | `/api/v1/reservations` | customer | My rescues |
+| POST | `/api/v1/reservations/{id}/cancel` | customer | Cancel and put the food back on sale |
+| GET | `/api/v1/vendor/reservations` | business | Orders waiting to be collected |
+| POST | `/api/v1/vendor/reservations/collect` | business | Confirm a handover with the customer's code |
 | GET | `/api/v1/admin/users` | admin | Search and filter accounts |
 | PATCH | `/api/v1/admin/users/{id}/enabled` | admin | Enable or disable an account |
 | GET | `/api/v1/admin/stats` | admin | Account and listing counts |
@@ -77,6 +82,37 @@ Errors are always JSON: `{ status, code, message, fieldErrors?, path }`.
 Vendors enter only a usual price and a rescue price. The server calculates the percentage (`Pricing.java`), stores it,
 and returns it as `discountPercent` and `savings`, so the number can never disagree with the prices. The listing form shows
 the same calculation live while typing, and offers one-tap discounts (30 to 70% off) that fill in the rescue price.
+
+## Reservations and why nothing is ever oversold
+
+Taking the last portion is the classic race condition: two people read "1 left" at the same moment and both succeed.
+Here the stock change is one atomic SQL statement, never read-then-write:
+
+```sql
+UPDATE listings SET quantity_remaining = quantity_remaining - :qty, version = version + 1
+WHERE id = :id AND status = 'AVAILABLE' AND quantity_remaining >= :qty AND pickup_end > now()
+```
+
+If two requests race, PostgreSQL makes the second wait for the first, re-checks the `WHERE`, and updates zero rows, so exactly
+one wins. The rest of the reservation (the row, the pickup code) lives in the same transaction, so a failure anywhere rolls the
+portions back onto the shelf. More guards:
+
+- A partial unique index lets a customer hold only one active reservation per listing, even on a double click.
+- `version` is bumped by every stock change, so a vendor editing a listing while a reservation lands gets a clean 409, not a silent overwrite.
+- A reservation keeps the price it was made at; later edits cannot change what someone agreed to pay.
+- Only the customer ever sees the pickup code; the business must hear it at the counter to confirm a handover.
+- Cancelling a reservation (or the vendor cancelling the listing) puts portions back and reopens a sold-out listing.
+- A scheduled job marks reservations nobody collected as no-shows once the pickup window closes.
+
+### Running the concurrency test
+`ReservationConcurrencyTest` fires 20 simultaneous reservations at a listing with 3 portions against a real PostgreSQL and
+asserts that exactly 3 succeed. It needs its own empty database (it skips itself if that does not exist):
+
+```sql
+CREATE DATABASE leftoverlift_test OWNER leftoverlift;
+```
+
+Then run it from Eclipse (right-click the test > Run As > JUnit Test) or with `mvn test`.
 
 ## Design decisions worth knowing
 
@@ -94,8 +130,8 @@ the same calculation live while typing, and offers one-tap discounts (30 to 70% 
 - [x] Phase 1: auth foundation, roles, vendor profiles, design system, landing / browse / sign-in screens
 - [x] Phase 1.5: admin bootstrap, admin endpoints and dashboard, refresh tokens with reuse detection, role-access tests
 - [x] Phase 2: vendor listings (create, edit, cancel, auto-expire), automatic discount, search, filters, sorting, pagination
+- [x] Phase 3: reservations with atomic stock, pickup codes, My rescues, vendor pickup desk, concurrency test
 - [ ] Phase 2.5: nearby search (latitude and longitude), photo upload
-- [ ] Phase 3: reservations with concurrency-safe stock (`@Version`), pickup codes
 - [ ] Phase 4: driver role and delivery tracking
 - [ ] Phase 5: Stripe test payments, email notifications, admin impact stats, deployment + CI
 - [ ] Later: move tokens to httpOnly cookies, rate limiting on auth endpoints, Testcontainers integration tests

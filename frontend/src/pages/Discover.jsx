@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { CATEGORY_OPTIONS, toCardListing } from '../api/adapters.js'
 import FoodCard from '../components/FoodCard.jsx'
+import ReserveDialog from '../components/ReserveDialog.jsx'
 import Reveal from '../components/Reveal.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 
@@ -48,6 +49,7 @@ export default function Discover() {
   const [reloadKey, setReloadKey] = useState(0)
 
   const [notice, setNotice] = useState('')
+  const [reserving, setReserving] = useState(null)
   const timer = useRef(null)
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -100,9 +102,13 @@ export default function Discover() {
       navigate('/login', { state: { from: location.pathname } })
       return
     }
-    setNotice(`Reservations open in the next update. “${listing.title}” will be yours to claim then.`)
-    clearTimeout(timer.current)
-    timer.current = setTimeout(() => setNotice(''), 4500)
+    if (user.role !== 'CONSUMER') {
+      setNotice('Reserving food is for customer accounts. Sign in with one to rescue a meal.')
+      clearTimeout(timer.current)
+      timer.current = setTimeout(() => setNotice(''), 4500)
+      return
+    }
+    setReserving(listing)
   }
 
   const filtered = category !== 'ALL' || debouncedQuery.trim() !== ''
@@ -176,6 +182,7 @@ export default function Discover() {
         </>
       )}
 
+      {reserving && <ReserveDialog listing={reserving} onClose={() => setReserving(null)} onChanged={() => setReloadKey((k) => k + 1)} />}
       {notice && <p className="toast" role="status">{notice}</p>}
     </div>
   )

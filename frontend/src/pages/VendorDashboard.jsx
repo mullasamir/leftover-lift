@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { categoryLabel, STATUS_LABELS } from '../api/adapters.js'
 import CountdownRing from '../components/CountdownRing.jsx'
+import PickupDesk from '../components/PickupDesk.jsx'
 import Reveal from '../components/Reveal.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
 import { formatMoney } from '../lib/money.js'
@@ -123,6 +124,8 @@ export default function VendorDashboard() {
         </div>
         <Link to="/vendor/new" className="btn btn--accent">Post surplus food</Link>
       </div>
+
+      <PickupDesk />
 
       {phase === 'ready' && (
         <div className="stats stats--dash">

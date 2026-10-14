@@ -3,6 +3,7 @@ package com.leftoverlift.listing;
 import com.leftoverlift.common.ApiException;
 import com.leftoverlift.listing.dto.ListingRequest;
 import com.leftoverlift.listing.dto.ListingResponse;
+import com.leftoverlift.reservation.ReservationRepository;
 import com.leftoverlift.user.BusinessType;
 import com.leftoverlift.user.User;
 import com.leftoverlift.user.VendorProfile;
@@ -26,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,6 +37,7 @@ class ListingServiceTest {
 
     @Mock ListingRepository listings;
     @Mock VendorProfileRepository vendors;
+    @Mock ReservationRepository reservations;
 
     ListingService service;
     User owner;
@@ -42,7 +45,7 @@ class ListingServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ListingService(listings, vendors, Clock.fixed(NOW, ZoneOffset.UTC));
+        service = new ListingService(listings, vendors, reservations, Clock.fixed(NOW, ZoneOffset.UTC));
 
         owner = new User();
         owner.setId(UUID.randomUUID());
@@ -173,6 +176,7 @@ class ListingServiceTest {
         when(listings.findWithVendorById(l.getId())).thenReturn(Optional.of(l));
 
         assertThat(service.cancel(owner, l.getId()).status()).isEqualTo(ListingStatus.CANCELLED);
+        verify(reservations).cancelActiveForListing(l.getId()); // anyone holding a reservation is released
         assertThatThrownBy(() -> service.cancel(owner, l.getId()))
                 .hasFieldOrPropertyWithValue("code", "LISTING_NOT_CANCELLABLE");
     }

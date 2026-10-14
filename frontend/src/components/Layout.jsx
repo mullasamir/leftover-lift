@@ -23,7 +23,8 @@ export default function Layout() {
         <div className="page site-header__row">
           <Brand />
           <nav className="nav" aria-label="Main">
-            <NavLink to="/discover" className={user && user.role !== 'CONSUMER' ? 'nav__optional' : undefined}>Find food</NavLink>
+            <NavLink to="/discover" className={user ? 'nav__optional' : undefined}>Find food</NavLink>
+            {user?.role === 'CONSUMER' && <NavLink to="/rescues">My rescues</NavLink>}
             {user?.role === 'VENDOR' && <NavLink to="/vendor">My listings</NavLink>}
             {user?.role === 'ADMIN' && <NavLink to="/admin">Admin</NavLink>}
             {user ? (

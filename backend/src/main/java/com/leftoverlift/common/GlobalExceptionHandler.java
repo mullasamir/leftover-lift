@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -47,6 +48,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleBadParam(MethodArgumentTypeMismatchException ex, HttpServletRequest req) {
         return ResponseEntity.badRequest().body(ApiError.of(
                 400, "BAD_PARAMETER", "The value given for '" + ex.getName() + "' is not valid.", req.getRequestURI()));
+    }
+
+    /** Someone else changed the same record a moment ago (for example a reservation landed while a vendor was editing). */
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<ApiError> handleConcurrent(OptimisticLockingFailureException ex, HttpServletRequest req) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                409, "CONCURRENT_UPDATE", "This was just changed by someone else. Reload and try again.", req.getRequestURI()));
     }
 
     /** Safety net for races, e.g. two registrations with the same email at the same instant. */

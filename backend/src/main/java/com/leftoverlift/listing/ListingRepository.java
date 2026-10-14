@@ -30,6 +30,39 @@ public interface ListingRepository extends JpaRepository<Listing, UUID>, JpaSpec
 
     long countByStatus(ListingStatus status);
 
+    // ------------------------------------------------------------------------------------------
+    // Stock changes are single SQL statements, never "read the number, then write it back".
+    // The WHERE clause is the guard: if two people race for the last portion, PostgreSQL makes the
+    // second UPDATE wait for the first, re-checks the condition, and updates zero rows. Overselling
+    // is impossible no matter how many requests arrive at once. Each statement also bumps `version`,
+    // so a vendor editing the same listing at that moment gets a conflict instead of a silent overwrite.
+    // ------------------------------------------------------------------------------------------
+
+    /** Takes portions off the shelf. Returns 1 on success, 0 if they are gone or the window has closed. */
+    @Modifying(flushAutomatically = true)
+    @Query(value = "UPDATE listings SET quantity_remaining = quantity_remaining - :qty, version = version + 1, updated_at = now() "
+            + "WHERE id = :id AND status = 'AVAILABLE' AND quantity_remaining >= :qty AND pickup_end > now()", nativeQuery = true)
+    int claimPortions(@Param("id") UUID id, @Param("qty") int qty);
+
+    /** Flips a listing to SOLD_OUT once the last portion is taken. */
+    @Modifying(flushAutomatically = true)
+    @Query(value = "UPDATE listings SET status = 'SOLD_OUT', version = version + 1, updated_at = now() "
+            + "WHERE id = :id AND status = 'AVAILABLE' AND quantity_remaining = 0", nativeQuery = true)
+    int markSoldOutIfEmpty(@Param("id") UUID id);
+
+    /** Puts cancelled portions back on the shelf, never beyond the original total. */
+    @Modifying(flushAutomatically = true)
+    @Query(value = "UPDATE listings SET quantity_remaining = quantity_remaining + :qty, version = version + 1, updated_at = now() "
+            + "WHERE id = :id AND status IN ('AVAILABLE', 'SOLD_OUT') AND quantity_remaining + :qty <= quantity_total "
+            + "AND pickup_end > now()", nativeQuery = true)
+    int releasePortions(@Param("id") UUID id, @Param("qty") int qty);
+
+    /** A sold-out listing that has stock again goes back on sale. */
+    @Modifying(flushAutomatically = true)
+    @Query(value = "UPDATE listings SET status = 'AVAILABLE', version = version + 1, updated_at = now() "
+            + "WHERE id = :id AND status = 'SOLD_OUT' AND quantity_remaining > 0 AND pickup_end > now()", nativeQuery = true)
+    int reopenIfStocked(@Param("id") UUID id);
+
     @Modifying
     @Query("update Listing l set l.status = :target where l.status in :current and l.pickupEnd < :now")
     int expire(@Param("target") ListingStatus target,
