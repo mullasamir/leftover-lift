@@ -2,6 +2,7 @@ package com.leftoverlift.auth;
 
 import com.leftoverlift.auth.dto.AuthResponse;
 import com.leftoverlift.auth.dto.LoginRequest;
+import com.leftoverlift.auth.dto.RefreshRequest;
 import com.leftoverlift.auth.dto.RegisterRequest;
 import com.leftoverlift.auth.dto.UserResponse;
 import com.leftoverlift.user.User;
@@ -29,6 +30,17 @@ public class AuthController {
     @PostMapping("/login")
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @PostMapping("/refresh")
+    public AuthResponse refresh(@Valid @RequestBody RefreshRequest request) {
+        return authService.refresh(request.refreshToken());
+    }
+
+    @PostMapping("/logout")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void logout(@Valid @RequestBody RefreshRequest request) {
+        authService.logout(request.refreshToken());
     }
 
     @GetMapping("/me")

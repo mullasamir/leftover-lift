@@ -23,9 +23,13 @@ export default function Layout() {
         <div className="page site-header__row">
           <Brand />
           <nav className="nav" aria-label="Main">
-            <NavLink to="/discover">Find food</NavLink>
+            <NavLink to="/discover" className={user && user.role !== 'CONSUMER' ? 'nav__optional' : undefined}>Find food</NavLink>
+            {user?.role === 'VENDOR' && <NavLink to="/vendor">My listings</NavLink>}
+            {user?.role === 'ADMIN' && <NavLink to="/admin">Admin</NavLink>}
             {user ? (
-              <NavLink to="/account">{user.fullName.split(' ')[0]}</NavLink>
+              <NavLink to="/account" className="avatar" aria-label={`Your account, ${user.fullName}`}>
+                {user.fullName.trim().charAt(0).toUpperCase()}
+              </NavLink>
             ) : (
               <Link to="/login" className="btn btn--small btn--ghost">Sign in</Link>
             )}

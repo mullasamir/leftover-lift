@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import AnimatedNumber from './AnimatedNumber.jsx'
+import { currencySymbol, formatMoney } from '../lib/money.js'
 import FoodScene from './FoodScene.jsx'
 import { SCENES } from './scenes.js'
 
 // Rough, clearly-labelled estimates. Kept in one place so they are easy to change or cite.
 const KG_PER_MEAL = 0.45
 const CO2E_PER_KG_FOOD = 2.5 // kg CO2-equivalent per kg of food wasted, a commonly used average
-const SAVING_PER_MEAL = 9 // dollars, from the sample prices on this page
+const SAVING_PER_MEAL = 250 // rupees, from the sample prices on this page
 const KG_CO2_PER_KM_DRIVEN = 0.17
 
 const MAX = 30
@@ -77,10 +78,10 @@ export default function Impact() {
             <p className="result"><strong><AnimatedNumber value={meals} /></strong><span>meals rescued in a year</span></p>
             <p className="result"><strong><AnimatedNumber value={kg} decimals={0} suffix=" kg" /></strong><span>of food kept on plates</span></p>
             <p className="result"><strong><AnimatedNumber value={co2} decimals={0} suffix=" kg" /></strong><span>CO₂e avoided, roughly {Math.round(km).toLocaleString()} km of driving</span></p>
-            <p className="result"><strong><AnimatedNumber value={saved} prefix="$" /></strong><span>saved against full prices</span></p>
+            <p className="result"><strong><AnimatedNumber value={saved} prefix={currencySymbol} /></strong><span>saved against full prices</span></p>
           </div>
           <p className="impact__note">
-            Estimates only: about 0.45 kg of food per meal, 2.5 kg CO₂e per kg of wasted food, and an average saving of $9 per rescue based on the sample prices here.
+            Estimates only: about 0.45 kg of food per meal, 2.5 kg CO₂e per kg of wasted food, and an average saving of {formatMoney(SAVING_PER_MEAL)} per rescue based on the sample prices here.
           </p>
         </div>
       </div>

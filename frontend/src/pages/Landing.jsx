@@ -76,7 +76,7 @@ export default function Landing() {
           </div>
           <ul className="perks">
             <li><Check />Free to join</li>
-            <li><Check />Rescues from a few dollars</li>
+            <li><Check />Rescues from under ₹150</li>
             <li><Check />Collect within hours</li>
           </ul>
         </div>

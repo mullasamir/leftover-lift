@@ -1,15 +1,18 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { api } from '../api/client.js'
+import { CATEGORY_OPTIONS, toCardListing } from '../api/adapters.js'
 import FoodCard from '../components/FoodCard.jsx'
 import Reveal from '../components/Reveal.jsx'
-import { CATEGORIES, discountPercent, sampleListings } from '../data/mockListings.js'
 import { useAuth } from '../context/AuthContext.jsx'
 
+const PAGE_SIZE = 12
+const CATEGORIES = [{ value: 'ALL', label: 'Everything' }, ...CATEGORY_OPTIONS]
 const SORTS = {
-  closing: { label: 'Closing soonest', fn: (a, b) => a.closesAt - b.closesAt },
-  nearest: { label: 'Nearest', fn: (a, b) => parseFloat(a.distance) - parseFloat(b.distance) },
-  cheapest: { label: 'Lowest price', fn: (a, b) => a.price - b.price },
-  deal: { label: 'Biggest saving', fn: (a, b) => discountPercent(b) - discountPercent(a) },
+  CLOSING: 'Closing soonest',
+  DEAL: 'Biggest saving',
+  CHEAPEST: 'Lowest price',
+  NEWEST: 'Newly added',
 }
 
 const SearchIcon = () => (
@@ -18,26 +21,79 @@ const SearchIcon = () => (
   </svg>
 )
 
+function useDebounced(value, delay = 350) {
+  const [debounced, setDebounced] = useState(value)
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(value), delay)
+    return () => clearTimeout(id)
+  }, [value, delay])
+  return debounced
+}
+
 export default function Discover() {
   const [params] = useSearchParams()
-  const [category, setCategory] = useState(CATEGORIES.some((c) => c.id === params.get('cat')) ? params.get('cat') : 'all')
+  const initialCategory = (params.get('cat') ?? '').toUpperCase()
+  const [category, setCategory] = useState(CATEGORIES.some((c) => c.value === initialCategory) ? initialCategory : 'ALL')
   const [query, setQuery] = useState('')
-  const [sort, setSort] = useState('closing')
+  const [sort, setSort] = useState('CLOSING')
+  const debouncedQuery = useDebounced(query)
+
+  const [items, setItems] = useState([])
+  const [page, setPage] = useState(0)
+  const [last, setLast] = useState(true)
+  const [total, setTotal] = useState(0)
+  const [phase, setPhase] = useState('loading') // loading | ready | error
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [error, setError] = useState(null)
+  const [reloadKey, setReloadKey] = useState(0)
+
   const [notice, setNotice] = useState('')
   const timer = useRef(null)
   const { user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
+  const filters = useCallback(
+    (pageNumber) => ({ q: debouncedQuery.trim(), category: category === 'ALL' ? undefined : category, sort, page: pageNumber, size: PAGE_SIZE }),
+    [debouncedQuery, category, sort],
+  )
+
+  useEffect(() => {
+    const controller = new AbortController()
+    setPhase('loading')
+    api.listings
+      .search(filters(0), controller.signal)
+      .then((res) => {
+        setItems(res.content.map(toCardListing))
+        setPage(0)
+        setLast(res.last)
+        setTotal(res.totalElements)
+        setPhase('ready')
+      })
+      .catch((err) => {
+        if (err?.name === 'AbortError') return
+        setError(err)
+        setPhase('error')
+      })
+    return () => controller.abort()
+  }, [filters, reloadKey])
+
   useEffect(() => () => clearTimeout(timer.current), [])
 
-  const visible = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    return sampleListings
-      .filter((l) => category === 'all' || l.category === category)
-      .filter((l) => !q || [l.vendor, l.title, l.detail, ...l.tags].join(' ').toLowerCase().includes(q))
-      .sort(SORTS[sort].fn)
-  }, [category, query, sort])
+  async function loadMore() {
+    setLoadingMore(true)
+    try {
+      const res = await api.listings.search(filters(page + 1))
+      setItems((prev) => [...prev, ...res.content.map(toCardListing)])
+      setPage(page + 1)
+      setLast(res.last)
+      setTotal(res.totalElements)
+    } catch (err) {
+      setError(err)
+    } finally {
+      setLoadingMore(false)
+    }
+  }
 
   function handleRescue(listing) {
     if (!user) {
@@ -49,12 +105,14 @@ export default function Discover() {
     timer.current = setTimeout(() => setNotice(''), 4500)
   }
 
+  const filtered = category !== 'ALL' || debouncedQuery.trim() !== ''
+
   return (
     <div className="page discover">
       <div className="panel discover__panel">
         <div>
           <h1>Rescue something good</h1>
-          <p className="hand">sample listings until businesses start posting</p>
+          <p className="hand">fresh from kitchens that are closing up</p>
         </div>
 
         <div className="controls">
@@ -66,31 +124,56 @@ export default function Discover() {
           <label className="sort">
             Sort by
             <select value={sort} onChange={(e) => setSort(e.target.value)}>
-              {Object.entries(SORTS).map(([id, s]) => <option key={id} value={id}>{s.label}</option>)}
+              {Object.entries(SORTS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
             </select>
           </label>
         </div>
 
         <div className="chips" role="group" aria-label="Filter by type of food">
           {CATEGORIES.map((c) => (
-            <button key={c.id} type="button" className="chip" aria-pressed={category === c.id} onClick={() => setCategory(c.id)}>{c.label}</button>
+            <button key={c.value} type="button" className="chip" aria-pressed={category === c.value} onClick={() => setCategory(c.value)}>{c.label}</button>
           ))}
         </div>
-        <p className="discover__count" role="status">{visible.length === 1 ? '1 rescue' : `${visible.length} rescues`} nearby</p>
+        <p className="discover__count" role="status">
+          {phase === 'ready' ? `${total} ${total === 1 ? 'rescue' : 'rescues'} available` : phase === 'loading' ? 'Looking for food nearby…' : ''}
+        </p>
       </div>
 
-      {visible.length === 0 ? (
+      {phase === 'loading' && (
+        <div className="listing-grid" aria-hidden="true">
+          {[0, 1, 2].map((i) => <div className="skeleton-card" key={i} />)}
+        </div>
+      )}
+
+      {phase === 'error' && (
+        <div className="empty" role="alert">
+          <h2 style={{ fontSize: 'var(--step-2)' }}>We couldn’t load the food</h2>
+          <p>{error?.message}</p>
+          <button type="button" className="btn btn--small" onClick={() => setReloadKey((k) => k + 1)}>Try again</button>
+        </div>
+      )}
+
+      {phase === 'ready' && items.length === 0 && (
         <div className="empty">
-          <h2 style={{ fontSize: 'var(--step-2)' }}>Nothing matches yet</h2>
-          <p>Try a different word, or clear the filter. Kitchens post more as they close up this evening.</p>
-          <button type="button" className="btn btn--small" onClick={() => { setCategory('all'); setQuery('') }}>Clear filters</button>
+          <h2 style={{ fontSize: 'var(--step-2)' }}>{filtered ? 'Nothing matches yet' : 'No food listed right now'}</h2>
+          <p>{filtered ? 'Try a different word, or clear the filter.' : 'Kitchens post more as they close up this evening. Check back soon.'}</p>
+          {filtered && <button type="button" className="btn btn--small" onClick={() => { setCategory('ALL'); setQuery('') }}>Clear filters</button>}
         </div>
-      ) : (
-        <div className="listing-grid">
-          {visible.map((l, i) => (
-            <Reveal key={l.id} variant="deal" delay={(i % 3) * 80}><FoodCard listing={l} onRescue={handleRescue} /></Reveal>
-          ))}
-        </div>
+      )}
+
+      {phase === 'ready' && items.length > 0 && (
+        <>
+          <div className="listing-grid">
+            {items.map((l, i) => (
+              <Reveal key={l.id} variant="deal" delay={(i % 3) * 80}><FoodCard listing={l} onRescue={handleRescue} /></Reveal>
+            ))}
+          </div>
+          {!last && (
+            <div className="discover__more">
+              <button type="button" className="btn btn--ghost" onClick={loadMore} disabled={loadingMore}>{loadingMore ? 'Loading…' : 'Show more'}</button>
+            </div>
+          )}
+        </>
       )}
 
       {notice && <p className="toast" role="status">{notice}</p>}

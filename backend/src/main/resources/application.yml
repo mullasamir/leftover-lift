@@ -26,7 +26,17 @@ app:
   jwt:
     # Base64 encoded, at least 256 bits. Generate: openssl rand -base64 48
     secret: ${JWT_SECRET:ZGV2LW9ubHktc2VjcmV0LWNoYW5nZS1iZWZvcmUtZGVwbG95aW5nLTAxMjM0NTY3ODk=}
-    expiration-minutes: ${JWT_EXPIRATION_MINUTES:60}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:30}
+  refresh:
+    expiration-days: ${REFRESH_EXPIRATION_DAYS:14}
+  admin:
+    # Set both to create the first administrator on startup. Leave blank to skip.
+    email: ${ADMIN_EMAIL:}
+    password: ${ADMIN_PASSWORD:}
+    name: ${ADMIN_NAME:Platform Admin}
+  demo-data:
+    # true = create demo businesses and food listings on startup. Local development only.
+    enabled: ${DEMO_DATA:false}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
 

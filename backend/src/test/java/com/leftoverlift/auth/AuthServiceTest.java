@@ -29,6 +29,7 @@ class AuthServiceTest {
     @Mock UserRepository users;
     @Mock VendorProfileRepository vendors;
     @Mock JwtService jwt;
+    @Mock RefreshTokenService refreshTokens;
 
     // Low cost factor keeps the tests fast; production uses 12 (see SecurityConfig).
     final PasswordEncoder encoder = new BCryptPasswordEncoder(4);
@@ -37,8 +38,9 @@ class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new AuthService(users, vendors, encoder, jwt);
+        service = new AuthService(users, vendors, encoder, jwt, refreshTokens);
         when(jwt.generateToken(any())).thenReturn("token");
+        when(refreshTokens.issue(any())).thenReturn("refresh");
         when(jwt.lifetimeSeconds()).thenReturn(3600L);
         when(users.save(any(User.class))).thenAnswer(inv -> {
             User u = inv.getArgument(0);
@@ -61,6 +63,7 @@ class AuthServiceTest {
         assertThat(saved.getValue().getPasswordHash()).isNotEqualTo("supersecret").startsWith("$2");
         assertThat(saved.getValue().getEmail()).isEqualTo("asha@example.com");
         assertThat(res.accessToken()).isEqualTo("token");
+        assertThat(res.refreshToken()).isEqualTo("refresh");
     }
 
     @Test
@@ -130,5 +133,38 @@ class AuthServiceTest {
         AuthResponse res = service.login(new LoginRequest("Asha@example.com", "rightpassword"));
 
         assertThat(res.user().email()).isEqualTo("asha@example.com");
+    }
+
+    @Test
+    void refreshIssuesNewTokensForAnEnabledUser() {
+        User u = new User();
+        u.setId(UUID.randomUUID());
+        u.setRole(Role.CONSUMER);
+        u.setEnabled(true);
+        when(refreshTokens.consume("old")).thenReturn(u);
+
+        AuthResponse res = service.refresh("old");
+
+        assertThat(res.accessToken()).isEqualTo("token");
+        assertThat(res.refreshToken()).isEqualTo("refresh");
+    }
+
+    @Test
+    void refreshIsRefusedForADisabledUser() {
+        User u = new User();
+        u.setId(UUID.randomUUID());
+        u.setRole(Role.CONSUMER);
+        u.setEnabled(false);
+        when(refreshTokens.consume("old")).thenReturn(u);
+
+        assertThatThrownBy(() -> service.refresh("old"))
+                .hasFieldOrPropertyWithValue("code", "INVALID_REFRESH_TOKEN");
+    }
+
+    @Test
+    void logoutRevokesTheRefreshToken() {
+        service.logout("old");
+
+        verify(refreshTokens).revoke("old");
     }
 }

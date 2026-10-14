@@ -12,6 +12,7 @@ import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -40,6 +41,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleUnreadable(HttpMessageNotReadableException ex, HttpServletRequest req) {
         return ResponseEntity.badRequest().body(ApiError.of(
                 400, "MALFORMED_REQUEST", "The request body is missing or malformed.", req.getRequestURI()));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiError> handleBadParam(MethodArgumentTypeMismatchException ex, HttpServletRequest req) {
+        return ResponseEntity.badRequest().body(ApiError.of(
+                400, "BAD_PARAMETER", "The value given for '" + ex.getName() + "' is not valid.", req.getRequestURI()));
     }
 
     /** Safety net for races, e.g. two registrations with the same email at the same instant. */

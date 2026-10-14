@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Field from '../components/Field.jsx'
-import { useAuth } from '../context/AuthContext.jsx'
+import { homeFor, useAuth } from '../context/AuthContext.jsx'
 
 export default function Login() {
   const { login } = useAuth()
@@ -18,8 +18,8 @@ export default function Login() {
     setBusy(true)
     setError(null)
     try {
-      await login(form)
-      navigate(location.state?.from ?? '/discover', { replace: true })
+      const user = await login(form)
+      navigate(location.state?.from ?? homeFor(user), { replace: true })
     } catch (err) {
       setError(err)
     } finally {

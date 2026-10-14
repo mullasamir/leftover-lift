@@ -4,8 +4,7 @@ import FoodScene from './FoodScene.jsx'
 import { burst } from '../lib/burst.js'
 import { prefersReducedMotion } from '../lib/scrollBus.js'
 import { discountPercent } from '../data/mockListings.js'
-
-const money = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' })
+import { formatMoney } from '../lib/money.js'
 
 // Gentle 3D tilt that follows the pointer. Only on devices with a real hover pointer.
 function useTilt(ref) {
@@ -32,10 +31,11 @@ function useTilt(ref) {
   }, [ref])
 }
 
-export default function FoodCard({ listing, onRescue }) {
+/** `preview` draws the card the way customers will see it, with the button switched off (used in the vendor form). */
+export default function FoodCard({ listing, onRescue, preview = false }) {
   const ref = useRef(null)
   useTilt(ref)
-  const { vendor, distance, title, detail, tags = [], left, price, originalPrice, pickup, closesAt, windowMinutes, category } = listing
+  const { vendor, distance, place, title, detail, tags = [], left, price, originalPrice, pickup, closesAt, windowMinutes, category } = listing
 
   function handleRescue(e) {
     const r = e.currentTarget.getBoundingClientRect()
@@ -47,12 +47,12 @@ export default function FoodCard({ listing, onRescue }) {
     <article className="fcard" data-cat={category} ref={ref}>
       <div className="fcard__art">
         <FoodScene category={category} />
-        <span className="fcard__badge">{discountPercent(listing)}% off</span>
+        {(listing.discount ?? discountPercent(listing)) > 0 && <span className="fcard__badge">{listing.discount ?? discountPercent(listing)}% off</span>}
         {left != null && <span className={`fcard__left${left <= 2 ? ' fcard__left--low' : ''}`}>{left === 1 ? 'Last one' : `${left} left`}</span>}
       </div>
 
       <div className="fcard__body">
-        <p className="fcard__vendor">{vendor}, {distance} away</p>
+        <p className="fcard__vendor">{vendor}{distance ? `, ${distance} away` : place ? `, ${place}` : ''}</p>
         <h3 className="fcard__title">{title}</h3>
         <p className="fcard__detail">{detail}</p>
         {tags.length > 0 && (
@@ -70,11 +70,11 @@ export default function FoodCard({ listing, onRescue }) {
 
       <div className="fcard__stub">
         <p className="fcard__price">
-          <strong>{money.format(price)}</strong>
-          <s><span className="visually-hidden">Usually </span>{money.format(originalPrice)}</s>
+          <strong>{formatMoney(price)}</strong>
+          <s><span className="visually-hidden">Usually </span>{formatMoney(originalPrice)}</s>
         </p>
         <CountdownRing closesAt={closesAt} windowMinutes={windowMinutes} />
-        <button type="button" className="btn btn--accent btn--small" onClick={handleRescue}>Rescue this</button>
+        <button type="button" className="btn btn--accent btn--small" onClick={handleRescue} disabled={preview} tabIndex={preview ? -1 : undefined}>Rescue this</button>
       </div>
     </article>
   )

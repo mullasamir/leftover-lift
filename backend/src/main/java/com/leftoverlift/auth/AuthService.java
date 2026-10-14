@@ -21,16 +21,18 @@ public class AuthService {
     private final VendorProfileRepository vendors;
     private final PasswordEncoder encoder;
     private final JwtService jwt;
+    private final RefreshTokenService refreshTokens;
 
     /** A real BCrypt hash used to keep login timing similar when the email is unknown. */
     private final String dummyHash;
 
     public AuthService(UserRepository users, VendorProfileRepository vendors,
-                       PasswordEncoder encoder, JwtService jwt) {
+                       PasswordEncoder encoder, JwtService jwt, RefreshTokenService refreshTokens) {
         this.users = users;
         this.vendors = vendors;
         this.encoder = encoder;
         this.jwt = jwt;
+        this.refreshTokens = refreshTokens;
         this.dummyHash = encoder.encode("not-a-real-password");
     }
 
@@ -73,7 +75,7 @@ public class AuthService {
         return issue(user, profile);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public AuthResponse login(LoginRequest req) {
         String email = normalize(req.email());
         User user = users.findByEmail(email).orElse(null);
@@ -88,13 +90,29 @@ public class AuthService {
         return issue(user, vendors.findByUserId(user.getId()).orElse(null));
     }
 
+    /** Swaps a valid refresh token for a fresh access token and a new refresh token. */
+    @Transactional(noRollbackFor = ApiException.class)
+    public AuthResponse refresh(String rawRefreshToken) {
+        User user = refreshTokens.consume(rawRefreshToken);
+        if (!user.isEnabled()) {
+            throw ApiException.unauthorized("INVALID_REFRESH_TOKEN", "Your session has expired. Please sign in again.");
+        }
+        return issue(user, vendors.findByUserId(user.getId()).orElse(null));
+    }
+
+    @Transactional
+    public void logout(String rawRefreshToken) {
+        refreshTokens.revoke(rawRefreshToken);
+    }
+
     @Transactional(readOnly = true)
     public UserResponse me(User user) {
         return UserResponse.from(user, vendors.findByUserId(user.getId()).orElse(null));
     }
 
     private AuthResponse issue(User user, VendorProfile profile) {
-        return AuthResponse.bearer(jwt.generateToken(user), jwt.lifetimeSeconds(), UserResponse.from(user, profile));
+        return AuthResponse.bearer(jwt.generateToken(user), refreshTokens.issue(user), jwt.lifetimeSeconds(),
+                UserResponse.from(user, profile));
     }
 
     private static String normalize(String email) {

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import Field from '../components/Field.jsx'
-import { useAuth } from '../context/AuthContext.jsx'
+import { homeFor, useAuth } from '../context/AuthContext.jsx'
 
 const BUSINESS_TYPES = [
   ['BAKERY', 'Bakery'], ['RESTAURANT', 'Restaurant'], ['CAFE', 'Café'], ['GROCERY', 'Grocery store'],
@@ -31,7 +31,7 @@ export default function Register() {
     try {
       const payload = { ...form, role, phone: form.phone || null, vendor: isVendor ? vendor : null }
       const user = await register(payload)
-      navigate(user.role === 'VENDOR' ? '/account' : '/discover', { replace: true })
+      navigate(homeFor(user), { replace: true })
     } catch (err) {
       setError(err)
     } finally {
