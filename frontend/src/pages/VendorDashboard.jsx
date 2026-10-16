@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { categoryLabel, STATUS_LABELS } from '../api/adapters.js'
 import CountdownRing from '../components/CountdownRing.jsx'
+import ImpactCard from '../components/ImpactCard.jsx'
 import PickupDesk from '../components/PickupDesk.jsx'
 import Reveal from '../components/Reveal.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -48,6 +49,9 @@ function ListingRow({ listing, onCancel }) {
         {listing.status === 'AVAILABLE' && (
           <CountdownRing closesAt={end} windowMinutes={Math.max(15, Math.round((end - start) / 60000))} />
         )}
+        {!live && (
+          <Link to={`/vendor/new?from=${listing.id}`} className="btn btn--small btn--accent">Post again</Link>
+        )}
         {live && !confirming && (
           <div className="lrow__actions">
             <Link to={`/vendor/${listing.id}/edit`} className="btn btn--small btn--ghost">Edit</Link>
@@ -76,6 +80,7 @@ export default function VendorDashboard() {
   const [error, setError] = useState(null)
   const [flash, setFlash] = useState(location.state?.flash ?? '')
   const [reloadKey, setReloadKey] = useState(0)
+  const [impact, setImpact] = useState(null)
   const timer = useRef(null)
 
   useEffect(() => {
@@ -88,6 +93,10 @@ export default function VendorDashboard() {
     return () => {
       cancelled = true
     }
+  }, [reloadKey])
+
+  useEffect(() => {
+    api.vendor.stats().then(setImpact).catch(() => {})
   }, [reloadKey])
 
   useEffect(() => {
@@ -126,6 +135,8 @@ export default function VendorDashboard() {
       </div>
 
       <PickupDesk />
+
+      {impact && <ImpactCard stats={impact} businessName={user.vendor?.businessName ?? 'We'} />}
 
       {phase === 'ready' && (
         <div className="stats stats--dash">

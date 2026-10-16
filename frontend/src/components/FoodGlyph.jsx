@@ -1,5 +1,5 @@
 // Small icons, one per food category, used where a full illustration would be too big.
-const ink = '#2B2358'
+const ink = '#14342B'
 
 const glyphs = {
   bakery: (

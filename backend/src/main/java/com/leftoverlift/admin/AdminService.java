@@ -5,6 +5,9 @@ import com.leftoverlift.admin.dto.AdminUserResponse;
 import com.leftoverlift.auth.RefreshTokenService;
 import com.leftoverlift.common.ApiException;
 import com.leftoverlift.common.PageResponse;
+import com.leftoverlift.contact.ContactMessage;
+import com.leftoverlift.contact.ContactMessageRepository;
+import com.leftoverlift.contact.dto.ContactMessageResponse;
 import com.leftoverlift.listing.ListingRepository;
 import com.leftoverlift.listing.ListingStatus;
 import com.leftoverlift.reservation.ReservationRepository;
@@ -30,13 +33,15 @@ public class AdminService {
     private final ListingRepository listings;
     private final ReservationRepository reservations;
     private final RefreshTokenService refreshTokens;
+    private final ContactMessageRepository contactMessages;
 
     public AdminService(UserRepository users, ListingRepository listings, ReservationRepository reservations,
-                        RefreshTokenService refreshTokens) {
+                        RefreshTokenService refreshTokens, ContactMessageRepository contactMessages) {
         this.users = users;
         this.listings = listings;
         this.reservations = reservations;
         this.refreshTokens = refreshTokens;
+        this.contactMessages = contactMessages;
     }
 
     @Transactional(readOnly = true)
@@ -72,6 +77,22 @@ public class AdminService {
     }
 
     @Transactional(readOnly = true)
+    public PageResponse<ContactMessageResponse> listMessages(Boolean handled, int page, int size) {
+        PageRequest pageable = PageRequest.of(Math.max(0, page), Math.min(Math.max(1, size), 50),
+                Sort.by(Sort.Order.desc("createdAt")));
+        var result = handled == null ? contactMessages.findAll(pageable) : contactMessages.findByHandled(handled, pageable);
+        return PageResponse.of(result.map(ContactMessageResponse::from));
+    }
+
+    @Transactional
+    public ContactMessageResponse setHandled(UUID id, boolean handled) {
+        ContactMessage message = contactMessages.findById(id).orElseThrow(() ->
+                ApiException.notFound("MESSAGE_NOT_FOUND", "We couldn't find that message."));
+        message.setHandled(handled);
+        return ContactMessageResponse.from(message);
+    }
+
+    @Transactional(readOnly = true)
     public AdminStatsResponse stats() {
         Map<Role, Long> byRole = new EnumMap<>(Role.class);
         long total = 0;
@@ -89,6 +110,6 @@ public class AdminService {
             byReservation.put(status, reservations.countByStatus(status));
         }
         long rescued = reservations.sumQuantityByStatus(ReservationStatus.COLLECTED);
-        return new AdminStatsResponse(total, byRole, byStatus, byReservation, rescued);
+        return new AdminStatsResponse(total, byRole, byStatus, byReservation, rescued, contactMessages.countByHandled(false));
     }
 }

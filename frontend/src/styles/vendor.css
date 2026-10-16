@@ -10,19 +10,19 @@
 .account__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
 .discover__more { display: flex; justify-content: center; }
 
-.nav a.avatar {
+a.avatar {
   display: grid; place-items: center; width: 2.5rem; height: 2.5rem; padding: 0; border-radius: 50%;
-  background: var(--blueberry); color: #fff; font-family: var(--font-display); font-size: 1.1rem; text-decoration: none;
-  border: 2px solid var(--ink); box-shadow: 0 3px 0 var(--night);
+  background: var(--leaf-deep); color: #fff; font-family: var(--font-display); font-size: 1.1rem; text-decoration: none;
+  border: 2px solid var(--ink); box-shadow: 0 3px 0 var(--leaf-ink);
 }
-@media (max-width: 40rem) { .nav .nav__optional { display: none; } }
+a.avatar:hover { transform: translateY(-2px); }
 
 .status { display: inline-block; padding: 0.1rem 0.65rem; border: 2px solid var(--ink); border-radius: 999px; font-size: 0.78rem; font-weight: 700; line-height: 1.5; }
 .status--available { background: var(--mint); }
-.status--sold_out { background: var(--apricot); }
+.status--sold_out { background: var(--peach); }
 .status--expired { background: var(--paper-deep); }
 .status--cancelled { background: #f4d6db; }
-.pill { display: inline-block; padding: 0.1rem 0.6rem; border: 2px solid var(--ink); border-radius: 999px; background: var(--mango); font-size: 0.8rem; font-weight: 700; }
+.pill { display: inline-block; padding: 0.1rem 0.6rem; border: 2px solid var(--ink); border-radius: 999px; background: var(--sun); font-size: 0.8rem; font-weight: 700; }
 
 /* ---------- Loading skeleton ---------- */
 .skeleton-card {
@@ -37,7 +37,7 @@
 .composer { padding-block: 2rem 5rem; display: grid; gap: 1.5rem; }
 .composer__head { display: grid; gap: 0.4rem; }
 .composer__head h1 { font-size: var(--step-3); }
-.composer__head .hand { color: var(--leaf-text); }
+.composer__head .hand { color: var(--leaf-deep); }
 .composer__grid { display: grid; gap: 1.5rem; }
 .composer__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
 .preview { display: grid; gap: 1rem; }
@@ -51,7 +51,7 @@
 .choice, .pricing { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 0.75rem; }
 .choice legend, .pricing legend { font-weight: 600; font-size: var(--step--1); padding: 0; margin-bottom: 0.5rem; }
 .choice legend span { font-weight: 400; color: var(--ink-soft); }
-.pricing { padding: 1.1rem; border: 2px dashed var(--grape); border-radius: 22px; }
+.pricing { padding: 1.1rem; border: 2px dashed var(--berry-text); border-radius: 22px; }
 
 .money-input { position: relative; }
 .money-input span { position: absolute; left: 0.9rem; top: 50%; translate: 0 -50%; font-weight: 700; color: var(--ink-soft); pointer-events: none; }
@@ -66,16 +66,16 @@
 /* The live discount meter */
 .meter { display: grid; gap: 0.9rem; padding: 1rem; border: 2px solid var(--ink); border-radius: 20px; background: var(--paper-deep); transition: background-color 0.3s ease, border-color 0.3s ease; }
 .meter--good { background: #d7f2e4; }
-.meter--bad { background: #fde7e3; border-color: var(--tomato); }
+.meter--bad { background: #fde7e3; border-color: var(--tomato-text); }
 .meter__top { display: flex; align-items: center; gap: 1rem; }
 @media (max-width: 30rem) { .meter__top { flex-direction: column; align-items: flex-start; gap: 0.4rem; } }
 .meter__number { flex: none; min-width: 5.4rem; font-family: var(--font-display); font-size: 2.8rem; line-height: 1; }
 .meter__number span { margin-left: 0.15rem; font-family: var(--font-body); font-size: 1rem; font-weight: 700; }
-.meter .meter__number .meter__dash { font-family: var(--font-display); font-size: 2.8rem; font-weight: 400; opacity: 0.35; margin: 0; }
+.meter .meter__number .meter__dash { font-family: var(--font-display); font-size: 2.8rem; font-weight: 700; opacity: 0.35; margin: 0; }
 .meter__headline { font-weight: 700; }
 .meter__hint { font-size: 0.9rem; color: var(--ink-soft); }
 .meter__track { height: 12px; border-radius: 99px; border: 2px solid var(--ink); background: #fff; overflow: hidden; }
-.meter__track span { display: block; height: 100%; background: linear-gradient(90deg, var(--mango), var(--leaf)); transition: width 0.45s cubic-bezier(0.3, 1.2, 0.5, 1); }
+.meter__track span { display: block; height: 100%; background: linear-gradient(90deg, var(--sun), var(--leaf)); transition: width 0.45s cubic-bezier(0.3, 1.2, 0.5, 1); }
 .meter__picks { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
 .meter__picks-label { margin-right: 0.25rem; font-size: 0.85rem; font-weight: 600; }
 @media (prefers-reduced-motion: reduce) { .meter__track span { transition: none; } }
@@ -84,7 +84,7 @@
 .dash { padding-block: 2rem 5rem; display: grid; gap: 1.5rem; }
 .dash__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; }
 .dash__head h1 { font-size: var(--step-3); }
-.dash__head .hand { color: var(--leaf-text); }
+.dash__head .hand { color: var(--leaf-deep); }
 .dash__section { display: grid; gap: 1.1rem; }
 .dash__h { font-size: var(--step-2); }
 .dash__list { display: grid; gap: 1rem; }
@@ -94,7 +94,7 @@
 .stats--dash .stat, .stats--admin .stat { padding: 0.8rem 0.9rem; }
 .stats--dash .stat strong, .stats--admin .stat strong { font-size: 2rem; }
 @media (min-width: 40rem) { .stats--dash { gap: 1rem; } .stats--dash .stat, .stats--admin .stat { padding: 1.1rem 1.25rem; } .stats--dash .stat strong, .stats--admin .stat strong { font-size: var(--step-3); } }
-@media (min-width: 60rem) { .stats--admin { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 60rem) { .stats--admin { grid-template-columns: repeat(5, 1fr); } }
 
 .lrow { display: grid; gap: 1rem; padding: 1.1rem; background: #fff; border: 2px solid var(--ink); border-radius: 22px; }
 @media (min-width: 40rem) { .lrow { grid-template-columns: 1fr auto; align-items: center; } }
@@ -104,7 +104,7 @@
 .lrow__title h3 { font-size: var(--step-1); }
 .lrow__meta { font-size: 0.9rem; color: var(--ink-soft); }
 .lrow__price { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.6rem; margin-top: 0.3rem; }
-.lrow__price strong { font-family: var(--font-display); font-weight: 400; font-size: var(--step-2); }
+.lrow__price strong { font-family: var(--font-display); font-weight: 700; font-size: var(--step-2); }
 .lrow__price s { color: var(--ink-soft); }
 .lrow__stock { font-size: 0.95rem; }
 .lrow__side { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }

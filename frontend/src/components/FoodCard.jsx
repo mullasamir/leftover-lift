@@ -32,7 +32,7 @@ function useTilt(ref) {
 }
 
 /** `preview` draws the card the way customers will see it, with the button switched off (used in the vendor form). */
-export default function FoodCard({ listing, onRescue, preview = false }) {
+export default function FoodCard({ listing, onRescue, preview = false, favorite = false, onToggleFavorite }) {
   const ref = useRef(null)
   useTilt(ref)
   const { vendor, distance, place, title, detail, tags = [], left, price, originalPrice, pickup, closesAt, windowMinutes, category } = listing
@@ -47,6 +47,11 @@ export default function FoodCard({ listing, onRescue, preview = false }) {
     <article className="fcard" data-cat={category} ref={ref}>
       <div className="fcard__art">
         <FoodScene category={category} />
+        {onToggleFavorite && (
+          <button type="button" className={`fcard__fav${favorite ? ' is-on' : ''}`} aria-pressed={favorite} aria-label={favorite ? `Remove ${title} from saved` : `Save ${title} for later`} onClick={() => onToggleFavorite(listing)}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.500-4.600-7.500-10.200A4.300 4.300 0 0 1 12 8.300a4.300 4.300 0 0 1 7.500 2.500C19.500 16.400 12 21 12 21z" /></svg>
+          </button>
+        )}
         {(listing.discount ?? discountPercent(listing)) > 0 && <span className="fcard__badge">{listing.discount ?? discountPercent(listing)}% off</span>}
         {left != null && <span className={`fcard__left${left <= 2 ? ' fcard__left--low' : ''}`}>{left === 1 ? 'Last one' : `${left} left`}</span>}
       </div>

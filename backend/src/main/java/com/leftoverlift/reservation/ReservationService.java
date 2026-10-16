@@ -7,6 +7,7 @@ import com.leftoverlift.listing.ListingRepository;
 import com.leftoverlift.listing.ListingStatus;
 import com.leftoverlift.reservation.dto.ReservationResponse;
 import com.leftoverlift.reservation.dto.VendorReservationResponse;
+import com.leftoverlift.reservation.dto.VendorStatsResponse;
 import com.leftoverlift.user.User;
 import com.leftoverlift.user.VendorProfile;
 import com.leftoverlift.user.VendorProfileRepository;
@@ -142,6 +143,19 @@ public class ReservationService {
         VendorProfile vendor = vendorOf(vendorUser);
         return reservations.findForVendorByStatus(vendor.getId(), ReservationStatus.RESERVED, PageRequest.of(0, 100))
                 .stream().map(VendorReservationResponse::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public VendorStatsResponse stats(User vendorUser) {
+        VendorProfile vendor = vendorOf(vendorUser);
+        Long portions = reservations.sumQuantityForVendor(vendor.getId(), ReservationStatus.COLLECTED);
+        BigDecimal revenue = reservations.sumRevenueForVendor(vendor.getId(), ReservationStatus.COLLECTED);
+        return new VendorStatsResponse(
+                portions == null ? 0 : portions,
+                revenue == null ? BigDecimal.ZERO : revenue,
+                reservations.countForVendor(vendor.getId(), ReservationStatus.COLLECTED),
+                reservations.countForVendor(vendor.getId(), ReservationStatus.RESERVED),
+                listings.countByVendorId(vendor.getId()));
     }
 
     // ------------------------------------------------------------------ helpers

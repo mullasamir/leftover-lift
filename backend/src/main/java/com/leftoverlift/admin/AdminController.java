@@ -3,6 +3,8 @@ package com.leftoverlift.admin;
 import com.leftoverlift.admin.dto.AdminStatsResponse;
 import com.leftoverlift.admin.dto.AdminUserResponse;
 import com.leftoverlift.admin.dto.SetEnabledRequest;
+import com.leftoverlift.admin.dto.SetHandledRequest;
+import com.leftoverlift.contact.dto.ContactMessageResponse;
 import com.leftoverlift.common.PageResponse;
 import com.leftoverlift.user.Role;
 import com.leftoverlift.user.User;
@@ -37,6 +39,18 @@ public class AdminController {
     public AdminUserResponse setEnabled(@AuthenticationPrincipal User actor, @PathVariable UUID id,
                                         @Valid @RequestBody SetEnabledRequest request) {
         return adminService.setEnabled(actor, id, request.enabled());
+    }
+
+    @GetMapping("/messages")
+    public PageResponse<ContactMessageResponse> messages(@RequestParam(required = false) Boolean handled,
+                                                         @RequestParam(defaultValue = "0") int page,
+                                                         @RequestParam(defaultValue = "20") int size) {
+        return adminService.listMessages(handled, page, size);
+    }
+
+    @PatchMapping("/messages/{id}/handled")
+    public ContactMessageResponse setHandled(@PathVariable UUID id, @Valid @RequestBody SetHandledRequest request) {
+        return adminService.setHandled(id, request.handled());
     }
 
     @GetMapping("/stats")

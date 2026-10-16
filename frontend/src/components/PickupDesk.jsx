@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { api } from '../api/client.js'
+import { confetti } from '../lib/confetti.js'
 import { formatMoney } from '../lib/money.js'
 import { pickupLabel } from '../lib/time.js'
 
@@ -25,6 +26,7 @@ export default function PickupDesk() {
       const r = await api.vendor.collect(code)
       setMessage({ ok: true, text: `Handed over: ${r.quantity} × ${r.listingTitle} to ${r.customerName}. Thank you!` })
       setCode('')
+      confetti({ count: 60 })
       loadWaiting()
     } catch (err) {
       setMessage({ ok: false, text: err.message })

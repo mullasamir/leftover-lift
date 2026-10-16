@@ -1,6 +1,6 @@
 import { prefersReducedMotion } from './scrollBus.js'
 
-const COLORS = ['#ff9f1c', '#1f9d77', '#f59cb0', '#7a4e9c', '#ffc58b', '#2b2358']
+const COLORS = ['#ffce2e', '#22b573', '#ff5c8a', '#ff5a3d', '#8ed8f8', '#14342b']
 
 /** A small burst of crumbs and leaves from a point on screen. Purely decorative. */
 export function burst(x, y) {

@@ -101,6 +101,10 @@ export const api = {
     get: (id) => request(`/listings/${id}`),
   },
 
+  contact: {
+    send: (payload) => request('/contact', { method: 'POST', body: payload, auth: false }),
+  },
+
   reservations: {
     create: (listingId, quantity) => request('/reservations', { method: 'POST', body: { listingId, quantity } }),
     mine: () => request('/reservations?size=50'),
@@ -108,6 +112,7 @@ export const api = {
   },
 
   vendor: {
+    stats: () => request('/vendor/reservations/stats'),
     waiting: () => request('/vendor/reservations'),
     collect: (pickupCode) => request('/vendor/reservations/collect', { method: 'POST', body: { pickupCode } }),
     list: () => request('/vendor/listings?size=50'),
@@ -120,6 +125,8 @@ export const api = {
   admin: {
     stats: () => request('/admin/stats'),
     users: (params) => request(`/admin/users${qs(params)}`),
+    messages: (params) => request(`/admin/messages${qs(params)}`),
+    setHandled: (id, handled) => request(`/admin/messages/${id}/handled`, { method: 'PATCH', body: { handled } }),
     setEnabled: (id, enabled) => request(`/admin/users/${id}/enabled`, { method: 'PATCH', body: { enabled } }),
   },
 }

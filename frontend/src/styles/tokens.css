@@ -1,38 +1,45 @@
 /*
-  Leftover Lift design tokens: "closing time".
-  The page is a sky that moves from a butter-yellow afternoon to a blueberry night as you scroll,
-  mirroring the real moment surplus food appears. Palette is named after fruit.
+  Leftover Lift design tokens: "fresh from the market".
+  A sunny day on a fruit stand: sky blue, butter yellow, tomato, leaf green and a pop of pink.
+  The page background is a bright sky that drifts from morning blue to a golden, pink sunset as you scroll.
 */
 :root {
-  --butter: #ffefc2;      /* afternoon sky */
-  --apricot: #ffc58b;     /* golden hour */
-  --rose: #f59cb0;        /* sunset */
-  --grape: #7a4e9c;       /* dusk */
-  --blueberry: #2b2358;   /* text, borders, primary buttons */
-  --night: #1a1540;       /* footer and night panels */
+  /* sky (the page background) */
+  --sky: #bfeaff;
+  --butter: #fff4c4;
+  --peach: #ffd9a8;
+  --blush: #ffc9da;
+  --cream: #fffbf0;
 
-  --paper: #fffbf2;       /* cards and panels */
-  --paper-deep: #f6e9cf;  /* sunken surfaces */
-  --mango: #ff9f1c;       /* highlight and accent buttons */
-  --leaf: #1f9d77;        /* fresh, saved, success (fills and icons) */
-  --leaf-text: #137a5b;   /* green that passes contrast as text */
-  --mint: #bdebd6;
-  --tomato: #d63a2b;      /* urgency */
+  /* brights */
+  --sun: #ffce2e;          /* the happy accent: buttons, stickers, highlights */
+  --tomato: #ff5a3d;       /* urgency and energy (fills) */
+  --tomato-text: #c9341a;  /* the same red, dark enough to read as text */
+  --leaf: #22b573;         /* fresh green (fills, icons) */
+  --leaf-deep: #0e8a55;    /* primary buttons, links on white */
+  --leaf-ink: #0a5c39;     /* shadows under green things */
+  --mint: #c9f5dd;
+  --berry: #ff5c8a;
+  --berry-text: #b81f55;
 
-  --ink: var(--blueberry);
-  --ink-soft: #5a5380;
-  --line: rgba(43, 35, 88, 0.22);
+  /* neutrals */
+  --pine: #14342b;         /* text and outlines: a deep green, never black */
+  --ink: var(--pine);
+  --ink-soft: #46604f;
+  --paper: #fffefa;
+  --paper-deep: #fff3d6;
+  --line: rgba(20, 52, 43, 0.2);
 
-  --font-display: 'Young Serif', Georgia, 'Times New Roman', serif;
-  --font-body: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Bricolage Grotesque', 'Trebuchet MS', system-ui, sans-serif;
+  --font-body: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-hand: 'Caveat', 'Bradley Hand', cursive;
 
   --step--1: 0.875rem;
   --step-0: 1rem;
   --step-1: 1.25rem;
   --step-2: 1.6rem;
-  --step-3: clamp(1.9rem, 1.4rem + 2.2vw, 2.7rem);
-  --step-4: clamp(2.4rem, 1.5rem + 4.4vw, 4.3rem);
+  --step-3: clamp(1.95rem, 1.4rem + 2.4vw, 2.85rem);
+  --step-4: clamp(2.5rem, 1.5rem + 4.6vw, 4.5rem);
 
   --r-card: 26px;
   --r-panel: 32px;

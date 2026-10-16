@@ -41,6 +41,19 @@ frontend/src
   api/ context/ components/ pages/ styles/ data/
 ```
 
+## Pages
+
+| Page | What it is |
+|---|---|
+| `/` | Landing: scroll-driven sky, pinned story, food carousel, "which side are you on", impact calculator, FAQ |
+| `/discover` | Live search and filters with food-icon chips, Surprise me roulette, saved hearts, closing-soon banner |
+| `/how-it-works` | Customer and business walkthroughs with an audience toggle |
+| `/for-businesses` | Benefits and a "how much could you recover?" calculator |
+| `/about`, `/faq`, `/contact`, `/privacy`, `/terms` | Content pages (searchable FAQ, contact form that lands in the admin inbox) |
+| `/rescues` | Customer: reservations, a rescue tree that grows with each collected portion, badges, personal impact |
+| `/vendor` | Business: pickup desk, impact card with share button, live and past listings, one-click "Post again" |
+| `/admin` | Admin: people table, counts, contact inbox |
+
 ## Admin account and demo data
 
 ```text
@@ -72,6 +85,10 @@ Demo accounts are `crumb@`, `saffron@`, `loom@` and `greenbasket@` `demo.leftove
 | POST | `/api/v1/reservations/{id}/cancel` | customer | Cancel and put the food back on sale |
 | GET | `/api/v1/vendor/reservations` | business | Orders waiting to be collected |
 | POST | `/api/v1/vendor/reservations/collect` | business | Confirm a handover with the customer's code |
+| GET | `/api/v1/vendor/reservations/stats` | business | Totals for the impact card: meals rescued, revenue recovered |
+| POST | `/api/v1/contact` | public | Contact form (honeypot field and a per-caller rate limit) |
+| GET | `/api/v1/admin/messages` | admin | Contact inbox (`handled` filter) |
+| PATCH | `/api/v1/admin/messages/{id}/handled` | admin | Mark a message handled or unread |
 | GET | `/api/v1/admin/users` | admin | Search and filter accounts |
 | PATCH | `/api/v1/admin/users/{id}/enabled` | admin | Enable or disable an account |
 | GET | `/api/v1/admin/stats` | admin | Account and listing counts |
@@ -131,6 +148,7 @@ Then run it from Eclipse (right-click the test > Run As > JUnit Test) or with `m
 - [x] Phase 1.5: admin bootstrap, admin endpoints and dashboard, refresh tokens with reuse detection, role-access tests
 - [x] Phase 2: vendor listings (create, edit, cancel, auto-expire), automatic discount, search, filters, sorting, pagination
 - [x] Phase 3: reservations with atomic stock, pickup codes, My rescues, vendor pickup desk, concurrency test
+- [x] Phase 3.5: fresh redesign, content pages, contact inbox, rescue tree and badges, vendor impact card, Surprise me
 - [ ] Phase 2.5: nearby search (latitude and longitude), photo upload
 - [ ] Phase 4: driver role and delivery tracking
 - [ ] Phase 5: Stripe test payments, email notifications, admin impact stats, deployment + CI

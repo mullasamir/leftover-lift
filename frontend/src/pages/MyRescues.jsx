@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client.js'
+import AnimatedNumber from '../components/AnimatedNumber.jsx'
+import Badges from '../components/Badges.jsx'
 import CountdownRing from '../components/CountdownRing.jsx'
-import { formatMoney } from '../lib/money.js'
+import GrowTree from '../components/GrowTree.jsx'
+import { currencySymbol, formatMoney } from '../lib/money.js'
 import { pickupLabel } from '../lib/time.js'
 
 const STATUS = {
@@ -100,14 +103,24 @@ export default function MyRescues() {
     timer.current = setTimeout(() => setNotice(''), 4500)
   }
 
-  const { upcoming, history, rescued } = useMemo(
-    () => ({
+  const { upcoming, history, rescued, impact } = useMemo(() => {
+    const collected = items.filter((r) => r.status === 'COLLECTED')
+    const portions = collected.reduce((sum, r) => sum + r.quantity, 0)
+    const kg = portions * 0.45
+    return {
       upcoming: items.filter((r) => r.status === 'RESERVED'),
       history: items.filter((r) => r.status !== 'RESERVED'),
-      rescued: items.filter((r) => r.status === 'COLLECTED').reduce((sum, r) => sum + r.quantity, 0),
-    }),
-    [items],
-  )
+      rescued: portions,
+      impact: {
+        portions,
+        kg,
+        co2: kg * 2.5,
+        saved: collected.reduce((sum, r) => sum + Math.max(0, Number(r.listing.originalPrice ?? r.unitPrice) - Number(r.unitPrice)) * r.quantity, 0),
+        bakery: collected.filter((r) => r.listing.category === 'BAKERY').reduce((sum, r) => sum + r.quantity, 0),
+        places: new Set(collected.map((r) => r.listing.businessName)).size,
+      },
+    }
+  }, [items])
 
   return (
     <div className="page dash">
@@ -135,6 +148,20 @@ export default function MyRescues() {
           <p>Browse what kitchens near you have left today and rescue your first meal.</p>
           <Link to="/discover" className="btn">Find food</Link>
         </div>
+      )}
+
+      {phase === 'ready' && (
+        <section className="panel panel--mint rescue-garden" aria-labelledby="garden-title">
+          <h2 id="garden-title" className="visually-hidden">Your rescue tree and badges</h2>
+          <GrowTree portions={impact.portions} />
+          <Badges stats={impact} />
+          <div className="results rescue-garden__stats">
+            <p className="result"><strong><AnimatedNumber value={impact.portions} /></strong><span>portions rescued</span></p>
+            <p className="result"><strong><AnimatedNumber value={impact.kg} decimals={1} suffix=" kg" /></strong><span>of food kept out of the bin</span></p>
+            <p className="result"><strong><AnimatedNumber value={impact.co2} decimals={1} suffix=" kg" /></strong><span>CO₂e avoided, roughly</span></p>
+            <p className="result"><strong><AnimatedNumber value={impact.saved} prefix={currencySymbol} /></strong><span>saved against full prices</span></p>
+          </div>
+        </section>
       )}
 
       {phase === 'ready' && upcoming.length > 0 && (

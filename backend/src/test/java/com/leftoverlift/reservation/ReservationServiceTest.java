@@ -7,6 +7,7 @@ import com.leftoverlift.listing.ListingRepository;
 import com.leftoverlift.listing.ListingStatus;
 import com.leftoverlift.reservation.dto.ReservationResponse;
 import com.leftoverlift.reservation.dto.VendorReservationResponse;
+import com.leftoverlift.reservation.dto.VendorStatsResponse;
 import com.leftoverlift.user.BusinessType;
 import com.leftoverlift.user.User;
 import com.leftoverlift.user.VendorProfile;
@@ -201,5 +202,33 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> service.collect(vendorUser, "nope22")).hasFieldOrPropertyWithValue("code", "CODE_NOT_FOUND");
         assertThatThrownBy(() -> service.collect(vendorUser, "K7QX2M")).hasFieldOrPropertyWithValue("code", "ALREADY_COLLECTED");
+    }
+
+    @Test
+    void vendorStatsTreatMissingTotalsAsZero() {
+        when(reservations.sumQuantityForVendor(vendor.getId(), ReservationStatus.COLLECTED)).thenReturn(null);
+        when(reservations.sumRevenueForVendor(vendor.getId(), ReservationStatus.COLLECTED)).thenReturn(null);
+        when(listings.countByVendorId(vendor.getId())).thenReturn(4L);
+
+        VendorStatsResponse stats = service.stats(vendorUser);
+
+        assertThat(stats.portionsRescued()).isZero();
+        assertThat(stats.revenueRecovered()).isEqualByComparingTo("0");
+        assertThat(stats.listingsPosted()).isEqualTo(4);
+    }
+
+    @Test
+    void vendorStatsAddUpWhatWasCollected() {
+        when(reservations.sumQuantityForVendor(vendor.getId(), ReservationStatus.COLLECTED)).thenReturn(18L);
+        when(reservations.sumRevenueForVendor(vendor.getId(), ReservationStatus.COLLECTED)).thenReturn(new BigDecimal("1782.00"));
+        when(reservations.countForVendor(vendor.getId(), ReservationStatus.COLLECTED)).thenReturn(9L);
+        when(reservations.countForVendor(vendor.getId(), ReservationStatus.RESERVED)).thenReturn(2L);
+
+        VendorStatsResponse stats = service.stats(vendorUser);
+
+        assertThat(stats.portionsRescued()).isEqualTo(18);
+        assertThat(stats.revenueRecovered()).isEqualByComparingTo("1782.00");
+        assertThat(stats.handovers()).isEqualTo(9);
+        assertThat(stats.waiting()).isEqualTo(2);
     }
 }

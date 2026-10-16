@@ -30,6 +30,8 @@ public interface ListingRepository extends JpaRepository<Listing, UUID>, JpaSpec
 
     long countByStatus(ListingStatus status);
 
+    long countByVendorId(UUID vendorId);
+
     // ------------------------------------------------------------------------------------------
     // Stock changes are single SQL statements, never "read the number, then write it back".
     // The WHERE clause is the guard: if two people race for the last portion, PostgreSQL makes the

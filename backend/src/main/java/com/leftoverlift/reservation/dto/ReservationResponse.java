@@ -23,7 +23,7 @@ public record ReservationResponse(
         ReservedListing listing
 ) {
     public record ReservedListing(UUID id, String title, ListingCategory category, Instant pickupStart, Instant pickupEnd,
-                                  String businessName, String address, String city) {
+                                  BigDecimal originalPrice, String businessName, String address, String city) {
     }
 
     public static ReservationResponse from(Reservation r) {
@@ -33,6 +33,6 @@ public record ReservationResponse(
                 r.getId(), r.getPickupCode(), r.getStatus(), r.getQuantity(), r.getUnitPrice(), r.getTotalPrice(),
                 r.getCreatedAt(), r.getCollectedAt(),
                 new ReservedListing(l.getId(), l.getTitle(), l.getCategory(), l.getPickupStart(), l.getPickupEnd(),
-                        v.getBusinessName(), v.getAddress(), v.getCity()));
+                        l.getOriginalPrice(), v.getBusinessName(), v.getAddress(), v.getCity()));
     }
 }

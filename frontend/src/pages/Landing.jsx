@@ -1,11 +1,12 @@
 import { useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import AnimatedNumber from '../components/AnimatedNumber.jsx'
+import BenefitCards from '../components/BenefitCards.jsx'
 import Faq from '../components/Faq.jsx'
 import FoodCard from '../components/FoodCard.jsx'
 import FoodGlyph from '../components/FoodGlyph.jsx'
 import FoodScene from '../components/FoodScene.jsx'
-import { closedScene } from '../components/scenes.js'
+import { closedScene, SCENES } from '../components/scenes.js'
 import Impact from '../components/Impact.jsx'
 import Journey from '../components/Journey.jsx'
 import Reveal from '../components/Reveal.jsx'
@@ -24,27 +25,6 @@ const Arrow = ({ dir }) => (
     <path d={dir === 'left' ? 'M12 4l-6 6 6 6' : 'M8 4l6 6-6 6'} />
   </svg>
 )
-
-const BENEFITS = [
-  {
-    title: 'Win back some of the cost',
-    body: 'Food you would have binned becomes income. Even a small price covers part of what it cost to make.',
-    bg: '#ffd59a',
-    icon: <path d="M12 3v18M16.5 7.5c-1-1.5-3-2-4.5-2-2.5 0-4 1.3-4 3s1.5 2.6 4 3 4 1.2 4 3-1.5 3-4 3c-1.8 0-3.7-.7-4.8-2.2" />,
-  },
-  {
-    title: 'Meet your neighbours',
-    body: 'People who find you through a rescue may come back for the full-price menu. A good first taste is the best advertising.',
-    bg: '#dccff7',
-    icon: <path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z" />,
-  },
-  {
-    title: 'See what you save',
-    body: 'Every rescue adds to your running total of meals saved and waste avoided, ready to share with your team and customers.',
-    bg: '#bdebd6',
-    icon: <path d="M4 20V10m6 10V4m6 16v-7m4 7H2" />,
-  },
-]
 
 export default function Landing() {
   const navigate = useNavigate()
@@ -66,7 +46,7 @@ export default function Landing() {
       {/* ---------- Hero ---------- */}
       <section className="page hero" aria-labelledby="hero-title">
         <div className="hero__copy">
-          <h1 id="hero-title">Dinner is waiting at the bakery down the road.</h1>
+          <h1 id="hero-title">Dinner is waiting at <mark>the bakery down the road.</mark></h1>
           <p className="hero__lede">
             Bakeries, cafés and kitchens post what did not sell today. You rescue it for a fraction of the price before the clock runs out.
           </p>
@@ -108,7 +88,7 @@ export default function Landing() {
 
       {/* ---------- Why it matters ---------- */}
       <section className="page why" aria-labelledby="why-title">
-        <Reveal className="panel why__panel">
+        <Reveal className="panel panel--mint why__panel">
           <div className="why__lead">
             <h2 id="why-title">Good food is thrown away every evening.</h2>
             <p className="hand">and it is fixable</p>
@@ -145,7 +125,7 @@ export default function Landing() {
       {/* ---------- Food rail ---------- */}
       <section className="page rescues" aria-labelledby="rescues-title">
         <div className="rescues__head">
-          <Reveal className="panel rescues__title">
+          <Reveal className="panel panel--sun rescues__title">
             <h2 id="rescues-title">On the table tonight</h2>
             <p>These are sample rescues. Once businesses join, this shelf fills with real food from places near you.</p>
           </Reveal>
@@ -162,6 +142,39 @@ export default function Landing() {
         <Link to="/discover" className="btn btn--ghost">See everything nearby</Link>
       </section>
 
+      {/* ---------- Two ways in ---------- */}
+      <section className="page paths" aria-labelledby="paths-title">
+        <Reveal className="panel panel--tight"><h2 id="paths-title">Which side of the counter are you on?</h2></Reveal>
+        <div className="paths__grid">
+          <Reveal variant="deal" className="pathcard pathcard--eat">
+            <div className="pathcard__art"><FoodScene markup={SCENES.meals} /></div>
+            <h3>I want to rescue food</h3>
+            <ul>
+              <li>Fresh food from places you already love</li>
+              <li>Pay at the counter, cancel any time</li>
+              <li>Grow a little tree and earn badges</li>
+            </ul>
+            <div className="pathcard__actions">
+              <Link to="/register" className="btn">Join as a customer</Link>
+              <Link to="/how-it-works" className="btn btn--ghost">How it works</Link>
+            </div>
+          </Reveal>
+          <Reveal variant="deal" delay={120} className="pathcard pathcard--sell">
+            <div className="pathcard__art"><FoodScene markup={SCENES.bakery} /></div>
+            <h3>I run a food business</h3>
+            <ul>
+              <li>Post leftovers in under a minute</li>
+              <li>The discount is worked out for you</li>
+              <li>Track your impact and share it</li>
+            </ul>
+            <div className="pathcard__actions">
+              <Link to="/register?role=VENDOR" className="btn btn--accent">Join as a business</Link>
+              <Link to="/for-businesses" className="btn btn--ghost">See the benefits</Link>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
       {/* ---------- Impact calculator ---------- */}
       <Impact />
 
@@ -174,19 +187,9 @@ export default function Landing() {
           <h2 id="biz-title">For kitchens, bakeries and shops</h2>
           <p>Closing time does not have to end in the bin. Here is what a rescue does for a business.</p>
         </Reveal>
-        <div className="biz__grid">
-          {BENEFITS.map((b, i) => (
-            <Reveal key={b.title} variant="deal" delay={i * 90} className="biz-card" style={{ '--ico-bg': b.bg }}>
-              <span className="biz-card__ico">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#2B2358" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{b.icon}</svg>
-              </span>
-              <h3>{b.title}</h3>
-              <p>{b.body}</p>
-            </Reveal>
-          ))}
-        </div>
+        <BenefitCards />
 
-        <Reveal className="nightband">
+        <Reveal className="sunband">
           <h2>Made more than you sold today?</h2>
           <p>List your surplus in under a minute and let the neighbourhood come and get it.</p>
           <Link to="/register?role=VENDOR" className="btn">Join as a business</Link>

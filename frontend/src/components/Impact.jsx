@@ -20,8 +20,8 @@ const PRESETS = [
 function Plate() {
   return (
     <svg viewBox="0 0 40 40" aria-hidden="true" focusable="false">
-      <circle cx="20" cy="20" r="17" fill="#FFFBF2" stroke="#2B2358" strokeWidth="2.5" />
-      <circle cx="20" cy="20" r="10.5" fill="#BDEBD6" stroke="#2B2358" strokeWidth="2" />
+      <circle cx="20" cy="20" r="17" fill="#FFFBF2" stroke="#14342B" strokeWidth="2.5" />
+      <circle cx="20" cy="20" r="10.5" fill="#BDEBD6" stroke="#14342B" strokeWidth="2" />
       <path d="M20 27c-4-3-6-7-3-10 2-2 3-1 3 1 0-2 1-3 3-1 3 3 1 7-3 10z" fill="#1F9D77" />
     </svg>
   )
@@ -45,7 +45,7 @@ export default function Impact() {
             One rescue feels small. Over a year it is not. Slide to how often you would pick up
             something good, and watch the year fill up.
           </p>
-          <p className="hand" style={{ color: 'var(--leaf-text)' }}>every plate is a meal that was not binned</p>
+          <p className="hand" style={{ color: 'var(--leaf-deep)' }}>every plate is a meal that was not binned</p>
           <FoodScene className="impact__art" markup={SCENES.bag} />
         </div>
 

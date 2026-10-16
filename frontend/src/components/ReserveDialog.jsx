@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api/client.js'
+import { confetti } from '../lib/confetti.js'
 import { formatMoney } from '../lib/money.js'
 
 const MAX_PER_RESERVATION = 3
@@ -31,6 +32,7 @@ export default function ReserveDialog({ listing, onClose, onChanged }) {
       const reservation = await api.reservations.create(listing.id, quantity)
       setResult(reservation)
       setPhase('done')
+      confetti({ count: 70 })
       onChanged?.()
     } catch (err) {
       setError(err.message)

@@ -3,11 +3,11 @@
   --rx: 0deg; --ry: 0deg;
   position: relative; display: flex; flex-direction: column; height: 100%;
   background: var(--paper); border: 2px solid var(--ink); border-radius: var(--r-card); overflow: hidden;
-  box-shadow: 0 8px 0 rgba(43, 35, 88, 0.18);
+  box-shadow: 0 8px 0 rgba(20, 52, 43, 0.18);
   transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));
   transition: transform 0.18s ease-out, box-shadow 0.18s ease;
 }
-@media (hover: hover) { .fcard:hover { box-shadow: 0 14px 0 rgba(43, 35, 88, 0.18); } }
+@media (hover: hover) { .fcard:hover { box-shadow: 0 14px 0 rgba(20, 52, 43, 0.18); } }
 
 .fcard[data-cat='bakery'] { --art-bg: #ffd59a; }
 .fcard[data-cat='meals'] { --art-bg: #ffc9b5; }
@@ -22,15 +22,15 @@
   content: ''; position: absolute; width: 62%; aspect-ratio: 1; border-radius: 50% 46% 54% 48%;
   background: rgba(255, 255, 255, 0.45); left: 19%; top: 8%;
 }
-.fcard__art svg { position: relative; width: 82%; height: auto; max-height: 92%; }
+.fcard__art > svg { position: relative; width: 82%; height: auto; max-height: 92%; }
 
 .fcard__badge, .fcard__left {
   position: absolute; top: 0.7rem; padding: 0.25rem 0.7rem; border: 2px solid var(--ink); border-radius: 999px;
   font-size: 0.8rem; font-weight: 700; line-height: 1.2;
 }
-.fcard__badge { left: 0.7rem; background: var(--mango); transform: rotate(-4deg); }
+.fcard__badge { left: 0.7rem; background: var(--sun); transform: rotate(-4deg); }
 .fcard__left { right: 0.7rem; background: var(--paper); }
-.fcard__left--low { color: var(--tomato); }
+.fcard__left--low { color: var(--tomato-text); }
 
 .fcard__body { display: grid; gap: 0.35rem; align-content: start; padding: 1rem 1.15rem 0.85rem; }
 .fcard__vendor { font-size: var(--step--1); color: var(--ink-soft); }
@@ -46,7 +46,7 @@
   padding: 0.9rem 1.15rem 1.15rem; border-top: 2px dashed var(--line);
 }
 .fcard__price { display: grid; line-height: 1.1; }
-.fcard__price strong { font-family: var(--font-display); font-weight: 400; font-size: var(--step-2); }
+.fcard__price strong { font-family: var(--font-display); font-weight: 700; font-size: var(--step-2); }
 .fcard__price s { color: var(--ink-soft); font-size: var(--step--1); }
 .fcard__stub .btn { grid-column: 1 / -1; }
 
@@ -57,7 +57,7 @@
 .ring__bar { stroke: var(--leaf); stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.4s ease; }
 .ring__label { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; font-weight: 700; font-size: 0.72rem; line-height: 1.05; padding: 0.55rem; }
 .ring--urgent .ring__bar { stroke: var(--tomato); }
-.ring--urgent .ring__label { color: var(--tomato); }
+.ring--urgent .ring__label { color: var(--tomato-text); }
 .ring--over .ring__bar { stroke: transparent; }
 @media (prefers-reduced-motion: no-preference) { .ring--urgent { animation: tick 1.6s ease-in-out infinite; } }
 @keyframes tick { 50% { transform: scale(1.08); } }

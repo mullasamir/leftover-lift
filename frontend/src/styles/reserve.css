@@ -2,9 +2,9 @@
 .sheet {
   position: fixed; padding: 0; color: var(--ink); background: var(--paper);
   width: min(30rem, calc(100% - 2rem)); max-height: calc(100svh - 2rem); overflow: auto;
-  border: 2px solid var(--ink); border-radius: 28px; box-shadow: 0 10px 0 rgba(43, 35, 88, 0.28);
+  border: 2px solid var(--ink); border-radius: 28px; box-shadow: 0 10px 0 rgba(20, 52, 43, 0.28);
 }
-.sheet::backdrop { background: rgba(26, 21, 64, 0.62); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
+.sheet::backdrop { background: rgba(10, 44, 32, 0.62); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
 @media (prefers-reduced-motion: no-preference) {
   .sheet[open] { animation: sheet-in 0.4s cubic-bezier(0.2, 1, 0.3, 1); }
   .sheet[open]::backdrop { animation: fade-in 0.3s ease; }
@@ -27,7 +27,7 @@
 .sheet__row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 0.6rem; border-bottom: 1.5px solid var(--line); }
 .sheet__row > span { color: var(--ink-soft); }
 .sheet__row strong { text-align: right; }
-.sheet__total strong { font-family: var(--font-display); font-weight: 400; font-size: var(--step-2); }
+.sheet__total strong { font-family: var(--font-display); font-weight: 700; font-size: var(--step-2); }
 .sheet__note { font-size: 0.9rem; color: var(--ink-soft); }
 .sheet__done { display: grid; gap: 1rem; justify-items: center; text-align: center; }
 .sheet__done h2 { padding-right: 0; }
@@ -55,7 +55,7 @@
 @media (min-width: 44rem) { .rticket__stub { padding: 0 0 0 1.25rem; border-top: 0; border-left: 2px dashed var(--line); } }
 .rticket__code { display: grid; gap: 0.1rem; }
 .rticket__code span { font-size: 0.78rem; font-weight: 600; color: var(--ink-soft); }
-.rticket__code strong { font-family: var(--font-display); font-weight: 400; font-size: 1.9rem; letter-spacing: 0.12em; line-height: 1.1; }
+.rticket__code strong { font-family: var(--font-display); font-weight: 700; font-size: 1.9rem; letter-spacing: 0.12em; line-height: 1.1; }
 
 /* ---------- Vendor pickup desk ---------- */
 .desk { display: grid; gap: 1.1rem; }

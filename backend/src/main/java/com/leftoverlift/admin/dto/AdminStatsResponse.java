@@ -11,6 +11,7 @@ public record AdminStatsResponse(
         Map<Role, Long> usersByRole,
         Map<ListingStatus, Long> listingsByStatus,
         Map<ReservationStatus, Long> reservationsByStatus,
-        long portionsRescued
+        long portionsRescued,
+        long unreadMessages
 ) {
 }

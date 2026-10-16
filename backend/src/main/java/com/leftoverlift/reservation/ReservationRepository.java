@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,6 +40,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
 
     @Query("select coalesce(sum(r.quantity), 0L) from Reservation r where r.status = :status")
     long sumQuantityByStatus(@Param("status") ReservationStatus status);
+
+    @Query("select sum(r.quantity) from Reservation r where r.listing.vendor.id = :vendorId and r.status = :status")
+    Long sumQuantityForVendor(@Param("vendorId") UUID vendorId, @Param("status") ReservationStatus status);
+
+    @Query("select sum(r.totalPrice) from Reservation r where r.listing.vendor.id = :vendorId and r.status = :status")
+    BigDecimal sumRevenueForVendor(@Param("vendorId") UUID vendorId, @Param("status") ReservationStatus status);
+
+    @Query("select count(r) from Reservation r where r.listing.vendor.id = :vendorId and r.status = :status")
+    long countForVendor(@Param("vendorId") UUID vendorId, @Param("status") ReservationStatus status);
 
     /** Used when a vendor cancels a listing: everyone holding a reservation for it is released. */
     @Modifying(flushAutomatically = true)

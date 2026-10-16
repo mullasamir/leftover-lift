@@ -1,6 +1,6 @@
 // Hand-drawn style food illustrations as raw SVG markup (trusted, static strings).
 // Shared look: 3px ink outline, flat fills, round joins.
-const INK = '#2B2358'
+const INK = '#14342B'
 const S = `stroke="${INK}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"`
 const SHADOW = '<ellipse cx="120" cy="146" rx="96" ry="9" fill="rgba(43,35,88,.14)"/>'
 

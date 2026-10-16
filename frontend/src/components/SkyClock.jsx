@@ -2,13 +2,13 @@ import { useEffect, useRef } from 'react'
 import { prefersReducedMotion, skyProgress, subscribe } from '../lib/scrollBus.js'
 
 const START = 16 * 60 + 30 // 4:30 pm
-const END = 22 * 60 + 30 // 10:30 pm
+const END = 20 * 60 + 30 // 8:30 pm
 
 const MOODS = [
   [0.25, 'Kitchens are still serving'],
   [0.5, 'Shelves are thinning out'],
   [0.75, 'Closing time is close'],
-  [1.01, 'Last pickups of the night'],
+  [1.01, 'Golden hour: last pickups'],
 ]
 
 function formatTime(totalMinutes) {

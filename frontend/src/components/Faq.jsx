@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 const QUESTIONS = [
   {
     q: 'Is rescued food safe to eat?',
@@ -34,6 +36,7 @@ export default function Faq() {
             </details>
           ))}
         </div>
+        <Link to="/faq" className="btn btn--ghost faq__more">See every question</Link>
       </div>
     </section>
   )

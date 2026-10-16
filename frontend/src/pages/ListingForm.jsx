@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { CATEGORY_OPTIONS, TAG_OPTIONS, toCardListing } from '../api/adapters.js'
 import DiscountMeter from '../components/DiscountMeter.jsx'
@@ -66,27 +66,38 @@ function validate(form) {
 
 export default function ListingForm() {
   const { id } = useParams()
+  const [searchParams] = useSearchParams()
+  const copyFrom = searchParams.get('from')
   const editing = Boolean(id)
+  const sourceId = id ?? copyFrom
   const { user } = useAuth()
   const navigate = useNavigate()
 
   const [form, setForm] = useState(emptyForm)
   const [errors, setErrors] = useState({})
   const [formError, setFormError] = useState('')
-  const [phase, setPhase] = useState(editing ? 'loading' : 'ready') // loading | ready | missing
+  const [phase, setPhase] = useState(sourceId ? 'loading' : 'ready') // loading | ready | missing
+  const [copied, setCopied] = useState(false)
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
-    if (!editing) return undefined
+    if (!sourceId) return undefined
     let cancelled = false
     api.vendor
-      .get(id)
-      .then((l) => !cancelled && (setForm(formFromListing(l)), setPhase('ready')))
+      .get(sourceId)
+      .then((l) => {
+        if (cancelled) return
+        const loaded = formFromListing(l)
+        // "Post again" keeps the food, prices and portions but starts a fresh pickup window from now.
+        setForm(editing ? loaded : { ...loaded, ...emptyForm(), title: loaded.title, description: loaded.description, category: loaded.category, dietaryTags: loaded.dietaryTags, originalPrice: loaded.originalPrice, rescuePrice: loaded.rescuePrice, quantity: loaded.quantity })
+        setCopied(!editing)
+        setPhase('ready')
+      })
       .catch(() => !cancelled && setPhase('missing'))
     return () => {
       cancelled = true
     }
-  }, [editing, id])
+  }, [editing, sourceId])
 
   const set = (name) => (e) => setForm((f) => ({ ...f, [name]: e.target.value }))
   const update = (patch) => setForm((f) => ({ ...f, ...patch }))
@@ -173,7 +184,7 @@ export default function ListingForm() {
       <div className="panel composer__head">
         <Link to="/vendor" className="backlink">← My listings</Link>
         <h1>{editing ? 'Edit your listing' : 'Post surplus food'}</h1>
-        <p className="hand">takes under a minute</p>
+        <p className="hand">{copied ? 'filled in from your earlier listing, just check the times' : 'takes under a minute'}</p>
       </div>
 
       <div className="composer__grid">
