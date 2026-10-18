@@ -42,8 +42,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
         "spring.datasource.url=" + TestDatabaseCondition.URL,
         "spring.datasource.username=" + TestDatabaseCondition.USER,
         "spring.datasource.password=" + TestDatabaseCondition.PASSWORD,
-        "app.admin.email=",
-        "app.demo-data.enabled=false"
+        "app.admin.email="
 })
 class ReservationConcurrencyTest {
 

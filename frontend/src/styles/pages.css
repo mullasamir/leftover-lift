@@ -123,6 +123,14 @@ mark {
 .pathcard li::before { content: ''; flex: none; width: 1.2rem; height: 1.2rem; margin-top: 0.2rem; border-radius: 50%; background: var(--leaf) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 10.500l3.500 3.500 6.500-7.500' fill='none' stroke='white' stroke-width='2.600' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 80% no-repeat; border: 2px solid var(--ink); }
 .pathcard__actions { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 0.4rem; }
 
+/* ================= Landing: real numbers ================= */
+.live-numbers { padding-block: 2.5rem 0.5rem; }
+.live-numbers__row { display: grid; gap: 1rem; padding: 1.25rem; background: rgba(255, 254, 250, 0.92); border: 2px solid var(--ink); border-radius: 28px; box-shadow: 0 8px 0 rgba(20, 52, 43, 0.14); }
+.live-numbers__row p { display: grid; gap: 0.1rem; text-align: center; }
+.live-numbers__row strong { font-family: var(--font-display); font-weight: 800; font-size: clamp(2rem, 1.4rem + 2.4vw, 3rem); line-height: 1; color: var(--leaf-deep); }
+.live-numbers__row span { font-size: 0.95rem; color: var(--ink-soft); }
+@media (min-width: 40rem) { .live-numbers__row { grid-template-columns: repeat(3, 1fr); } }
+
 /* ================= Discover: fun extras ================= */
 .discover__top { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 1rem; }
 .surprise-btn svg { width: 1.25rem; height: 1.25rem; }

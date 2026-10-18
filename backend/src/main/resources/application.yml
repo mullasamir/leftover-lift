@@ -34,9 +34,6 @@ app:
     email: ${ADMIN_EMAIL:}
     password: ${ADMIN_PASSWORD:}
     name: ${ADMIN_NAME:Platform Admin}
-  demo-data:
-    # true = create demo businesses and food listings on startup. Local development only.
-    enabled: ${DEMO_DATA:false}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
 

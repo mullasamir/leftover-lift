@@ -107,6 +107,34 @@ public class ListingService {
         return PageResponse.of(listings.findByVendorId(vendor.getId(), pageable).map(ListingResponse::from));
     }
 
+    // ------------------------------------------------------------------ admin side
+
+    /** Every listing on the platform, any status, for the owner's overview. */
+    @Transactional(readOnly = true)
+    public PageResponse<ListingResponse> adminSearch(ListingStatus status, String q, int page, int size) {
+        Specification<Listing> spec = (root, query, cb) -> cb.conjunction();
+        if (status != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
+        }
+        if (hasText(q)) {
+            spec = spec.and(ListingSpecs.text(q.trim()));
+        }
+        Pageable pageable = PageRequest.of(Math.max(0, page), clampSize(size), Sort.by(Sort.Order.desc("createdAt")));
+        return PageResponse.of(listings.findAll(spec, pageable).map(ListingResponse::from));
+    }
+
+    /** The owner can take down any listing, for example one that breaks the rules. Reservations on it are released. */
+    @Transactional
+    public ListingResponse adminCancel(UUID id) {
+        Listing listing = listings.findWithVendorById(id).orElseThrow(ListingService::notFound);
+        if (listing.getStatus() != ListingStatus.AVAILABLE && listing.getStatus() != ListingStatus.SOLD_OUT) {
+            throw ApiException.conflict("LISTING_NOT_CANCELLABLE", "This listing has already ended.");
+        }
+        listing.setStatus(ListingStatus.CANCELLED);
+        reservations.cancelActiveForListing(listing.getId());
+        return ListingResponse.from(listing);
+    }
+
     // ------------------------------------------------------------------ public side
 
     @Transactional(readOnly = true)

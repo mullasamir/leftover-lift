@@ -96,6 +96,8 @@ export const api = {
   },
   me: () => request('/auth/me'),
 
+  stats: () => request('/stats', { auth: false }),
+
   listings: {
     search: (params, signal) => request(`/listings${qs(params)}`, { signal }),
     get: (id) => request(`/listings/${id}`),
@@ -125,6 +127,12 @@ export const api = {
   admin: {
     stats: () => request('/admin/stats'),
     users: (params) => request(`/admin/users${qs(params)}`),
+    vendors: (params) => request(`/admin/vendors${qs(params)}`),
+    listings: (params) => request(`/admin/listings${qs(params)}`),
+    cancelListing: (id) => request(`/admin/listings/${id}/cancel`, { method: 'POST' }),
+    reservations: (params) => request(`/admin/reservations${qs(params)}`),
+    cancelReservation: (id) => request(`/admin/reservations/${id}/cancel`, { method: 'POST' }),
+    collectReservation: (id) => request(`/admin/reservations/${id}/collect`, { method: 'POST' }),
     messages: (params) => request(`/admin/messages${qs(params)}`),
     setHandled: (id, handled) => request(`/admin/messages/${id}/handled`, { method: 'PATCH', body: { handled } }),
     setEnabled: (id, enabled) => request(`/admin/users/${id}/enabled`, { method: 'PATCH', body: { enabled } }),

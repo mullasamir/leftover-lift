@@ -28,6 +28,7 @@
   position: absolute; top: 0.7rem; padding: 0.25rem 0.7rem; border: 2px solid var(--ink); border-radius: 999px;
   font-size: 0.8rem; font-weight: 700; line-height: 1.2;
 }
+.fcard__example { position: absolute; left: 0.7rem; bottom: 0.7rem; padding: 0.15rem 0.7rem; background: var(--paper); border: 2px dashed var(--ink); border-radius: 999px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.02em; }
 .fcard__badge { left: 0.7rem; background: var(--sun); transform: rotate(-4deg); }
 .fcard__left { right: 0.7rem; background: var(--paper); }
 .fcard__left--low { color: var(--tomato-text); }

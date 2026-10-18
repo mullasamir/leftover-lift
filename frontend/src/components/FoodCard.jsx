@@ -32,7 +32,7 @@ function useTilt(ref) {
 }
 
 /** `preview` draws the card the way customers will see it, with the button switched off (used in the vendor form). */
-export default function FoodCard({ listing, onRescue, preview = false, favorite = false, onToggleFavorite }) {
+export default function FoodCard({ listing, onRescue, preview = false, example = false, favorite = false, onToggleFavorite }) {
   const ref = useRef(null)
   useTilt(ref)
   const { vendor, distance, place, title, detail, tags = [], left, price, originalPrice, pickup, closesAt, windowMinutes, category } = listing
@@ -47,6 +47,7 @@ export default function FoodCard({ listing, onRescue, preview = false, favorite 
     <article className="fcard" data-cat={category} ref={ref}>
       <div className="fcard__art">
         <FoodScene category={category} />
+        {example && <span className="fcard__example">Example</span>}
         {onToggleFavorite && (
           <button type="button" className={`fcard__fav${favorite ? ' is-on' : ''}`} aria-pressed={favorite} aria-label={favorite ? `Remove ${title} from saved` : `Save ${title} for later`} onClick={() => onToggleFavorite(listing)}>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.500-4.600-7.500-10.200A4.300 4.300 0 0 1 12 8.300a4.300 4.300 0 0 1 7.500 2.500C19.500 16.400 12 21 12 21z" /></svg>
@@ -79,7 +80,7 @@ export default function FoodCard({ listing, onRescue, preview = false, favorite 
           <s><span className="visually-hidden">Usually </span>{formatMoney(originalPrice)}</s>
         </p>
         <CountdownRing closesAt={closesAt} windowMinutes={windowMinutes} />
-        <button type="button" className="btn btn--accent btn--small" onClick={handleRescue} disabled={preview} tabIndex={preview ? -1 : undefined}>Rescue this</button>
+        <button type="button" className="btn btn--accent btn--small" onClick={handleRescue} disabled={preview || example} tabIndex={preview || example ? -1 : undefined}>Rescue this</button>
       </div>
     </article>
   )

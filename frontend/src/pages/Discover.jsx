@@ -4,6 +4,7 @@ import { api } from '../api/client.js'
 import { CATEGORY_OPTIONS, toCardListing } from '../api/adapters.js'
 import FoodCard from '../components/FoodCard.jsx'
 import FoodGlyph from '../components/FoodGlyph.jsx'
+import JoinButton from '../components/JoinButton.jsx'
 import ReserveDialog from '../components/ReserveDialog.jsx'
 import Reveal from '../components/Reveal.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -252,6 +253,7 @@ export default function Discover() {
             {saved ? 'Tap the heart on any food card to keep it here for later.' : filtered ? 'Try a different word, or clear the filter.' : 'Kitchens post more as they close up this evening. Check back soon.'}
           </p>
           {(filtered || saved) && <button type="button" className="btn btn--small" onClick={() => { setCategory('ALL'); setQuery('') }}>See everything</button>}
+          {!filtered && !saved && (!user || user.role === 'VENDOR') && <JoinButton role="VENDOR" className="btn btn--accent">Run a food business? Post the first listing</JoinButton>}
         </div>
       )}
 

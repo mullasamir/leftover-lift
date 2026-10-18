@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,6 +32,20 @@ public interface ListingRepository extends JpaRepository<Listing, UUID>, JpaSpec
     long countByStatus(ListingStatus status);
 
     long countByVendorId(UUID vendorId);
+
+    /** Food a customer could reserve right now. */
+    @Query("select count(l) from Listing l where l.status = :status and l.quantityRemaining > 0 and l.pickupEnd > :now")
+    long countVisible(@Param("status") ListingStatus status, @Param("now") Instant now);
+
+    /** [vendorId, number of listings ever posted] for each of the given businesses. */
+    @Query("select l.vendor.id, count(l) from Listing l where l.vendor.id in :ids group by l.vendor.id")
+    List<Object[]> countPostedByVendors(@Param("ids") Collection<UUID> ids);
+
+    /** [vendorId, number of listings live right now] for each of the given businesses. */
+    @Query("select l.vendor.id, count(l) from Listing l where l.vendor.id in :ids and l.status = :status "
+            + "and l.quantityRemaining > 0 and l.pickupEnd > :now group by l.vendor.id")
+    List<Object[]> countLiveByVendors(@Param("ids") Collection<UUID> ids, @Param("status") ListingStatus status,
+                                      @Param("now") Instant now);
 
     // ------------------------------------------------------------------------------------------
     // Stock changes are single SQL statements, never "read the number, then write it back".

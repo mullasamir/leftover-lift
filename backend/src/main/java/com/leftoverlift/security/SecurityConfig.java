@@ -46,6 +46,7 @@ public class SecurityConfig {
                                 "/api/v1/auth/refresh", "/api/v1/auth/logout").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/listings", "/api/v1/listings/*").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/contact").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/stats").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/vendor/**").hasRole("VENDOR")
                         .requestMatchers("/api/v1/reservations/**").hasRole("CONSUMER")

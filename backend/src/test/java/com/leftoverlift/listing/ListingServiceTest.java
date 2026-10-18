@@ -190,4 +190,18 @@ class ListingServiceTest {
         assertThatThrownBy(() -> service.getPublic(l.getId()))
                 .hasFieldOrPropertyWithValue("code", "LISTING_NOT_FOUND");
     }
+
+    @Test
+    void theOwnerCanTakeDownAnyonesListingAndReleaseItsReservations() {
+        Listing someoneElses = existing(5, 3);
+        VendorProfile other = new VendorProfile();
+        other.setId(UUID.randomUUID());
+        someoneElses.setVendor(other);
+        when(listings.findWithVendorById(someoneElses.getId())).thenReturn(Optional.of(someoneElses));
+
+        assertThat(service.adminCancel(someoneElses.getId()).status()).isEqualTo(ListingStatus.CANCELLED);
+        verify(reservations).cancelActiveForListing(someoneElses.getId());
+        assertThatThrownBy(() -> service.adminCancel(someoneElses.getId()))
+                .hasFieldOrPropertyWithValue("code", "LISTING_NOT_CANCELLABLE");
+    }
 }

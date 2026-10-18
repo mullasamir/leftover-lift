@@ -5,6 +5,7 @@ import com.leftoverlift.common.PageResponse;
 import com.leftoverlift.listing.Listing;
 import com.leftoverlift.listing.ListingRepository;
 import com.leftoverlift.listing.ListingStatus;
+import com.leftoverlift.reservation.dto.AdminReservationResponse;
 import com.leftoverlift.reservation.dto.ReservationResponse;
 import com.leftoverlift.reservation.dto.VendorReservationResponse;
 import com.leftoverlift.reservation.dto.VendorStatsResponse;
@@ -156,6 +157,49 @@ public class ReservationService {
                 reservations.countForVendor(vendor.getId(), ReservationStatus.COLLECTED),
                 reservations.countForVendor(vendor.getId(), ReservationStatus.RESERVED),
                 listings.countByVendorId(vendor.getId()));
+    }
+
+    // ------------------------------------------------------------------ admin
+
+    @Transactional(readOnly = true)
+    public PageResponse<AdminReservationResponse> adminList(java.util.Collection<ReservationStatus> statuses, int page, int size) {
+        java.util.Set<ReservationStatus> wanted = (statuses == null || statuses.isEmpty())
+                ? java.util.EnumSet.allOf(ReservationStatus.class) : java.util.EnumSet.copyOf(statuses);
+        // Live pickups: the ones closing soonest first. Completed: most recent first.
+        Sort sort = wanted.equals(java.util.EnumSet.of(ReservationStatus.RESERVED))
+                ? Sort.by(Sort.Order.asc("listing.pickupEnd"))
+                : wanted.equals(java.util.EnumSet.of(ReservationStatus.COLLECTED))
+                ? Sort.by(Sort.Order.desc("collectedAt"))
+                : Sort.by(Sort.Order.desc("createdAt"));
+        PageRequest pageable = PageRequest.of(Math.max(0, page), Math.min(Math.max(1, size), 50), sort);
+        return PageResponse.of(reservations.findByStatusIn(wanted, pageable).map(AdminReservationResponse::from));
+    }
+
+    /** The owner can release a reservation on anyone's behalf. Portions go back on sale if the window is still open. */
+    @Transactional
+    public AdminReservationResponse adminCancel(UUID id) {
+        Reservation reservation = reservations.findWithListingById(id).orElseThrow(ReservationService::notFound);
+        if (reservation.getStatus() != ReservationStatus.RESERVED) {
+            throw ApiException.conflict("RESERVATION_NOT_CANCELLABLE", "This reservation can no longer be cancelled.");
+        }
+        reservation.setStatus(ReservationStatus.CANCELLED);
+        reservation.setCancelledAt(clock.instant());
+        UUID listingId = reservation.getListing().getId();
+        listings.releasePortions(listingId, reservation.getQuantity());
+        listings.reopenIfStocked(listingId);
+        return AdminReservationResponse.from(reservation);
+    }
+
+    /** Support override, for example when a customer cannot find their code. */
+    @Transactional
+    public AdminReservationResponse adminCollect(UUID id) {
+        Reservation reservation = reservations.findWithListingById(id).orElseThrow(ReservationService::notFound);
+        if (reservation.getStatus() != ReservationStatus.RESERVED) {
+            throw ApiException.conflict("RESERVATION_NOT_ACTIVE", "Only a waiting reservation can be marked as collected.");
+        }
+        reservation.setStatus(ReservationStatus.COLLECTED);
+        reservation.setCollectedAt(clock.instant());
+        return AdminReservationResponse.from(reservation);
     }
 
     // ------------------------------------------------------------------ helpers

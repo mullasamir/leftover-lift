@@ -1,12 +1,12 @@
 import FoodGlyph from './FoodGlyph.jsx'
 
 const ITEMS = [
-  { category: 'bakery', text: 'A mixed pastry bag found a home before closing' },
-  { category: 'meals', text: 'Two portions of paneer curry were collected warm' },
-  { category: 'grocery', text: 'A surprise veg box left with a happy cook' },
-  { category: 'cafe', text: 'The last sandwich of the day was rescued' },
-  { category: 'bakery', text: 'Two sourdough loaves are on their way to toast' },
-  { category: 'meals', text: 'Dinner for two was claimed in under a minute' },
+  { category: 'bakery', text: 'Fresh bakes at fair prices' },
+  { category: 'meals', text: 'Pay at the counter, nothing up front' },
+  { category: 'grocery', text: 'Reserve up to three portions' },
+  { category: 'cafe', text: 'Cancel any time before pickup ends' },
+  { category: 'bakery', text: 'Collect within hours with a short code' },
+  { category: 'meals', text: 'Every rescue keeps a meal out of the bin' },
 ]
 
 function Group({ hidden }) {
@@ -22,10 +22,10 @@ function Group({ hidden }) {
   )
 }
 
-/** Sample activity strip. The second group makes the loop seamless and is hidden from assistive tech. */
+/** A strip of what Leftover Lift offers. The second group makes the loop seamless and is hidden from assistive tech. */
 export default function Ticker() {
   return (
-    <div className="ticker" role="region" aria-label="Sample rescue activity">
+    <div className="ticker" role="region" aria-label="What Leftover Lift offers">
       <div className="ticker__track">
         <Group />
         <Group hidden />

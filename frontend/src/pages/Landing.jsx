@@ -1,5 +1,7 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { api } from '../api/client.js'
+import { toCardListing } from '../api/adapters.js'
 import AnimatedNumber from '../components/AnimatedNumber.jsx'
 import BenefitCards from '../components/BenefitCards.jsx'
 import Faq from '../components/Faq.jsx'
@@ -8,6 +10,7 @@ import FoodGlyph from '../components/FoodGlyph.jsx'
 import FoodScene from '../components/FoodScene.jsx'
 import { closedScene, SCENES } from '../components/scenes.js'
 import Impact from '../components/Impact.jsx'
+import JoinButton from '../components/JoinButton.jsx'
 import Journey from '../components/Journey.jsx'
 import Reveal from '../components/Reveal.jsx'
 import SkyClock from '../components/SkyClock.jsx'
@@ -26,8 +29,43 @@ const Arrow = ({ dir }) => (
   </svg>
 )
 
+/** The food that is really on offer right now, soonest to close first. */
+function useLiveFood(size) {
+  const [state, setState] = useState({ phase: 'loading', items: [] })
+  useEffect(() => {
+    let cancelled = false
+    api.listings
+      .search({ sort: 'CLOSING', size })
+      .then((res) => !cancelled && setState({ phase: 'ready', items: res.content.map(toCardListing) }))
+      .catch(() => !cancelled && setState({ phase: 'error', items: [] }))
+    return () => {
+      cancelled = true
+    }
+  }, [size])
+  return state
+}
+
+function usePublicStats() {
+  const [stats, setStats] = useState(null)
+  useEffect(() => {
+    let cancelled = false
+    api.stats().then((s) => !cancelled && setStats(s)).catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+  return stats
+}
+
 export default function Landing() {
   const navigate = useNavigate()
+  const live = useLiveFood(8)
+  const stats = usePublicStats()
+  // Real food leads the hero. Only when nothing is listed yet do we show clearly-labelled examples.
+  const showExamples = live.phase !== 'loading' && live.items.length === 0
+  const heroFront = live.items.length > 0 ? live.items[0] : showExamples ? sampleListings[1] : null
+  const heroBack = live.items.length > 1 ? live.items[1] : showExamples ? sampleListings[0] : null
+  const frontClosingSoon = showExamples || (heroFront && heroFront.closesAt - Date.now() < 60 * 60 * 1000)
   const railRef = useRef(null)
   const toDiscover = () => navigate('/discover')
 
@@ -52,7 +90,7 @@ export default function Landing() {
           </p>
           <div className="hero__actions">
             <Link to="/discover" className="btn">Find food near you</Link>
-            <Link to="/register?role=VENDOR" className="btn btn--ghost">I run a food business</Link>
+            <JoinButton role="VENDOR" className="btn btn--ghost">I run a food business</JoinButton>
           </div>
           <ul className="perks">
             <li><Check />Free to join</li>
@@ -65,17 +103,17 @@ export default function Landing() {
           <span className="float float--a" aria-hidden="true"><FoodGlyph category="bakery" /></span>
           <span className="float float--b" aria-hidden="true"><FoodGlyph category="grocery" /></span>
           <span className="float float--c" aria-hidden="true"><FoodGlyph category="cafe" /></span>
-          <div className="hero__card hero__card--back"><FoodCard listing={sampleListings[0]} onRescue={toDiscover} /></div>
-          <div className="hero__card hero__card--front">
-            <p className="hero__note" aria-hidden="true">
+          {heroBack && <div className="hero__card hero__card--back"><FoodCard listing={heroBack} example={showExamples} onRescue={toDiscover} /></div>}
+          {heroFront && <div className="hero__card hero__card--front">
+            {frontClosingSoon && <p className="hero__note" aria-hidden="true">
               <span>almost gone!</span>
               <svg viewBox="0 0 52 42" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 5c14-4 28 2 36 20" />
                 <path d="M30 24l9 3 3-10" />
               </svg>
-            </p>
-            <FoodCard listing={sampleListings[1]} onRescue={toDiscover} />
-          </div>
+            </p>}
+            <FoodCard listing={heroFront} example={showExamples} onRescue={toDiscover} />
+          </div>}
         </div>
       </section>
 
@@ -85,6 +123,17 @@ export default function Landing() {
       </p>
 
       <Ticker />
+
+      {/* ---------- Real numbers, only once there is something to count ---------- */}
+      {stats && (stats.businesses > 0 || stats.portionsRescued > 0) ? (
+        <section className="page live-numbers" aria-label="Leftover Lift so far">
+          <Reveal className="live-numbers__row">
+            <p><strong><AnimatedNumber whenVisible value={stats.businesses} /></strong><span>{stats.businesses === 1 ? 'business' : 'businesses'} on the platform</span></p>
+            <p><strong><AnimatedNumber whenVisible value={stats.liveListings} /></strong><span>{stats.liveListings === 1 ? 'rescue' : 'rescues'} available right now</span></p>
+            <p><strong><AnimatedNumber whenVisible value={stats.portionsRescued} /></strong><span>{stats.portionsRescued === 1 ? 'portion' : 'portions'} rescued so far</span></p>
+          </Reveal>
+        </section>
+      ) : null}
 
       {/* ---------- Why it matters ---------- */}
       <section className="page why" aria-labelledby="why-title">
@@ -127,19 +176,34 @@ export default function Landing() {
         <div className="rescues__head">
           <Reveal className="panel panel--sun rescues__title">
             <h2 id="rescues-title">On the table tonight</h2>
-            <p>These are sample rescues. Once businesses join, this shelf fills with real food from places near you.</p>
+            <p>{live.items.length > 0 ? 'Fresh from kitchens that are closing up. The soonest to close come first.' : 'Businesses post what is left as they close up, so this shelf fills up through the evening.'}</p>
           </Reveal>
-          <div className="rail-btns">
+          {live.items.length > 1 && <div className="rail-btns">
             <button type="button" className="rail-btn" onClick={() => scrollRail(-1)} aria-label="Previous rescues"><Arrow dir="left" /></button>
             <button type="button" className="rail-btn" onClick={() => scrollRail(1)} aria-label="Next rescues"><Arrow dir="right" /></button>
+          </div>}
+        </div>
+        {live.items.length > 0 ? (
+          <>
+            <div className="rail" ref={railRef} tabIndex={0} role="region" aria-label="Food available now, scroll sideways">
+              {live.items.map((l, i) => (
+                <Reveal key={l.id} variant="pop" delay={i * 70}><FoodCard listing={l} onRescue={toDiscover} /></Reveal>
+              ))}
+            </div>
+            <Link to="/discover" className="btn btn--ghost">See everything nearby</Link>
+          </>
+        ) : live.phase === 'loading' ? (
+          <p className="loading" role="status">Looking for food…</p>
+        ) : (
+          <div className="empty">
+            <h3>No food listed right now</h3>
+            <p>Kitchens post what is left as they close up. Check back this evening, or help us get started.</p>
+            <div className="page-hero__actions">
+              <Link to="/discover" className="btn btn--ghost">Check the shelf</Link>
+              <JoinButton role="VENDOR" className="btn btn--accent">Post the first listing</JoinButton>
+            </div>
           </div>
-        </div>
-        <div className="rail" ref={railRef} tabIndex={0} role="region" aria-label="Sample rescues, scroll sideways">
-          {sampleListings.map((l, i) => (
-            <Reveal key={l.id} variant="pop" delay={i * 70}><FoodCard listing={l} onRescue={toDiscover} /></Reveal>
-          ))}
-        </div>
-        <Link to="/discover" className="btn btn--ghost">See everything nearby</Link>
+        )}
       </section>
 
       {/* ---------- Two ways in ---------- */}
@@ -155,7 +219,7 @@ export default function Landing() {
               <li>Grow a little tree and earn badges</li>
             </ul>
             <div className="pathcard__actions">
-              <Link to="/register" className="btn">Join as a customer</Link>
+              <JoinButton className="btn">Join as a customer</JoinButton>
               <Link to="/how-it-works" className="btn btn--ghost">How it works</Link>
             </div>
           </Reveal>
@@ -168,7 +232,7 @@ export default function Landing() {
               <li>Track your impact and share it</li>
             </ul>
             <div className="pathcard__actions">
-              <Link to="/register?role=VENDOR" className="btn btn--accent">Join as a business</Link>
+              <JoinButton role="VENDOR" className="btn btn--accent">Join as a business</JoinButton>
               <Link to="/for-businesses" className="btn btn--ghost">See the benefits</Link>
             </div>
           </Reveal>
@@ -192,7 +256,7 @@ export default function Landing() {
         <Reveal className="sunband">
           <h2>Made more than you sold today?</h2>
           <p>List your surplus in under a minute and let the neighbourhood come and get it.</p>
-          <Link to="/register?role=VENDOR" className="btn">Join as a business</Link>
+          <JoinButton role="VENDOR" className="btn">Join as a business</JoinButton>
         </Reveal>
       </section>
     </>

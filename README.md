@@ -52,18 +52,17 @@ frontend/src
 | `/about`, `/faq`, `/contact`, `/privacy`, `/terms` | Content pages (searchable FAQ, contact form that lands in the admin inbox) |
 | `/rescues` | Customer: reservations, a rescue tree that grows with each collected portion, badges, personal impact |
 | `/vendor` | Business: pickup desk, impact card with share button, live and past listings, one-click "Post again" |
-| `/admin` | Admin: people table, counts, contact inbox |
+| `/admin` | Owner dashboard with tabs: overview totals, businesses, all food, live and completed pickups (with override actions), people, inbox |
 
-## Admin account and demo data
+## Admin account
 
 ```text
 ADMIN_EMAIL=you@example.com      # creates this administrator on startup if it does not exist yet
 ADMIN_PASSWORD=choose-8-or-more   # never committed; set it as an environment variable
-DEMO_DATA=true                    # local only: demo businesses and food, refreshed at every start
 ```
 
 In Eclipse: Run > Run Configurations > your app > **Environment** tab > add the variables above.
-Demo accounts are `crumb@`, `saffron@`, `loom@` and `greenbasket@` `demo.leftoverlift.test`, all with the password `demo-password-123`.
+There is no demo data: every listing on the site is posted by a real business.
 
 ## API
 
@@ -89,6 +88,13 @@ Demo accounts are `crumb@`, `saffron@`, `loom@` and `greenbasket@` `demo.leftove
 | POST | `/api/v1/contact` | public | Contact form (honeypot field and a per-caller rate limit) |
 | GET | `/api/v1/admin/messages` | admin | Contact inbox (`handled` filter) |
 | PATCH | `/api/v1/admin/messages/{id}/handled` | admin | Mark a message handled or unread |
+| GET | `/api/v1/stats` | public | Homepage totals: businesses, live listings, portions rescued |
+| GET | `/api/v1/admin/vendors` | admin | Every business with its owner, listings and rescued totals |
+| GET | `/api/v1/admin/listings` | admin | Every listing, any status (`status`, `q`) |
+| POST | `/api/v1/admin/listings/{id}/cancel` | admin | Take down any listing (releases its reservations) |
+| GET | `/api/v1/admin/reservations` | admin | Pickups by status: live, completed, cancelled or missed |
+| POST | `/api/v1/admin/reservations/{id}/collect` | admin | Support override: mark a pickup collected |
+| POST | `/api/v1/admin/reservations/{id}/cancel` | admin | Release a reservation on someone's behalf |
 | GET | `/api/v1/admin/users` | admin | Search and filter accounts |
 | PATCH | `/api/v1/admin/users/{id}/enabled` | admin | Enable or disable an account |
 | GET | `/api/v1/admin/stats` | admin | Account and listing counts |

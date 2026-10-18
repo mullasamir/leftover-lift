@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout.jsx'
+import GuestOnly from './components/GuestOnly.jsx'
 import RequireAuth from './components/RequireAuth.jsx'
 import RequireRole from './components/RequireRole.jsx'
 import Landing from './pages/Landing.jsx'
@@ -33,8 +34,8 @@ export default function App() {
         <Route path="faq" element={<FaqPage />} />
         <Route path="privacy" element={<Privacy />} />
         <Route path="terms" element={<Terms />} />
-        <Route path="login" element={<Login />} />
-        <Route path="register" element={<Register />} />
+        <Route path="login" element={<GuestOnly><Login /></GuestOnly>} />
+        <Route path="register" element={<GuestOnly><Register /></GuestOnly>} />
         <Route path="account" element={<RequireAuth><Account /></RequireAuth>} />
         <Route path="rescues" element={<RequireRole role="CONSUMER"><MyRescues /></RequireRole>} />
         <Route path="vendor" element={<RequireRole role="VENDOR"><VendorDashboard /></RequireRole>} />

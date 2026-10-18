@@ -9,6 +9,11 @@ import com.leftoverlift.reservation.ReservationService;
 import com.leftoverlift.reservation.VendorReservationController;
 import com.leftoverlift.security.JwtService;
 import com.leftoverlift.security.SecurityConfig;
+import com.leftoverlift.stats.PublicStatsController;
+import com.leftoverlift.listing.ListingRepository;
+import com.leftoverlift.reservation.ReservationRepository;
+import com.leftoverlift.user.VendorProfileRepository;
+import java.time.Clock;
 import com.leftoverlift.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /** Proves the role rules in SecurityConfig and the @PreAuthorize annotations actually hold. */
 @WebMvcTest(controllers = {AdminController.class, VendorListingController.class, ListingController.class,
-        ReservationController.class, VendorReservationController.class})
+        ReservationController.class, VendorReservationController.class, PublicStatsController.class})
 @Import(SecurityConfig.class)
 class RoleAccessTest {
 
@@ -37,6 +42,10 @@ class RoleAccessTest {
     @MockitoBean AdminService adminService;
     @MockitoBean ListingService listingService;
     @MockitoBean ReservationService reservationService;
+    @MockitoBean VendorProfileRepository vendorProfileRepository;
+    @MockitoBean ListingRepository listingRepository;
+    @MockitoBean ReservationRepository reservationRepository;
+    @MockitoBean Clock clock;
     @MockitoBean UserRepository userRepository; // needed by the JWT filter built in SecurityConfig
     @MockitoBean JwtService jwtService;
 
@@ -108,5 +117,27 @@ class RoleAccessTest {
         when(reservationService.mine(any(), anyInt(), anyInt())).thenReturn(new PageResponse<>(List.of(), 0, 50, 0, 0, true));
 
         mvc.perform(get("/api/v1/reservations")).andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "VENDOR")
+    void businessesCannotSeeTheOwnersOverview() throws Exception {
+        mvc.perform(get("/api/v1/admin/vendors")).andExpect(status().isForbidden());
+        mvc.perform(get("/api/v1/admin/listings")).andExpect(status().isForbidden());
+        mvc.perform(get("/api/v1/admin/reservations")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "CONSUMER")
+    void customersCannotCancelOtherPeoplesFoodOrPickups() throws Exception {
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                .post("/api/v1/admin/listings/" + java.util.UUID.randomUUID() + "/cancel")).andExpect(status().isForbidden());
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                .post("/api/v1/admin/reservations/" + java.util.UUID.randomUUID() + "/collect")).andExpect(status().isForbidden());
+    }
+
+    @Test
+    void theHomepageTotalsAreOpenToEveryone() throws Exception {
+        mvc.perform(get("/api/v1/stats")).andExpect(status().isOk());
     }
 }

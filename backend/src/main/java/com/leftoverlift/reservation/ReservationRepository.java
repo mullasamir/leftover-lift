@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -49,6 +50,17 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
 
     @Query("select count(r) from Reservation r where r.listing.vendor.id = :vendorId and r.status = :status")
     long countForVendor(@Param("vendorId") UUID vendorId, @Param("status") ReservationStatus status);
+
+    @Query("select sum(r.totalPrice) from Reservation r where r.status = :status")
+    BigDecimal sumRevenueByStatus(@Param("status") ReservationStatus status);
+
+    /** [vendorId, portions, revenue] of the given status for each of the given businesses. */
+    @Query("select l.vendor.id, sum(r.quantity), sum(r.totalPrice) from Reservation r join r.listing l "
+            + "where l.vendor.id in :ids and r.status = :status group by l.vendor.id")
+    List<Object[]> totalsByVendors(@Param("ids") Collection<UUID> ids, @Param("status") ReservationStatus status);
+
+    @EntityGraph(attributePaths = {"listing", "listing.vendor", "customer"})
+    Page<Reservation> findByStatusIn(Collection<ReservationStatus> statuses, Pageable pageable);
 
     /** Used when a vendor cancels a listing: everyone holding a reservation for it is released. */
     @Modifying(flushAutomatically = true)

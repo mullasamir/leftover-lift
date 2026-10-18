@@ -101,7 +101,7 @@ export default function Journey() {
             <div className={`scene${active === 0 ? ' is-active' : ''}`}><FoodScene markup={morningScene} /></div>
             <div className={`scene${active === 1 ? ' is-active' : ''}`}><FoodScene markup={closedScene} /></div>
             <div className={`scene scene--card${active === 2 ? ' is-active' : ''}`}>
-              <div className="fcard-wrap"><FoodCard listing={sampleListings[0]} /></div>
+              <div className="fcard-wrap"><FoodCard listing={sampleListings[0]} example /></div>
             </div>
             <div className={`scene${active === 3 ? ' is-active' : ''}`}><FoodScene markup={SCENES.bag} /></div>
           </div>

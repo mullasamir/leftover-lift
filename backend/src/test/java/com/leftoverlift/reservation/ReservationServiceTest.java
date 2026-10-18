@@ -5,6 +5,7 @@ import com.leftoverlift.listing.Listing;
 import com.leftoverlift.listing.ListingCategory;
 import com.leftoverlift.listing.ListingRepository;
 import com.leftoverlift.listing.ListingStatus;
+import com.leftoverlift.reservation.dto.AdminReservationResponse;
 import com.leftoverlift.reservation.dto.ReservationResponse;
 import com.leftoverlift.reservation.dto.VendorReservationResponse;
 import com.leftoverlift.reservation.dto.VendorStatsResponse;
@@ -230,5 +231,40 @@ class ReservationServiceTest {
         assertThat(stats.revenueRecovered()).isEqualByComparingTo("1782.00");
         assertThat(stats.handovers()).isEqualTo(9);
         assertThat(stats.waiting()).isEqualTo(2);
+    }
+
+    // ---------------------------------------------------------------- owner overrides
+
+    @Test
+    void theOwnerCanCancelAReservationAndPortionsReturn() {
+        customer.setEmail("asha@example.com");
+        Reservation r = reserved(ReservationStatus.RESERVED);
+        when(reservations.findWithListingById(r.getId())).thenReturn(Optional.of(r));
+
+        AdminReservationResponse res = service.adminCancel(r.getId());
+
+        assertThat(res.status()).isEqualTo(ReservationStatus.CANCELLED);
+        assertThat(res.customerEmail()).isEqualTo("asha@example.com");
+        verify(listings).releasePortions(listing.getId(), 2);
+        verify(listings).reopenIfStocked(listing.getId());
+    }
+
+    @Test
+    void theOwnerCanMarkAWaitingReservationAsCollectedButNotTwice() {
+        customer.setEmail("asha@example.com");
+        Reservation r = reserved(ReservationStatus.RESERVED);
+        when(reservations.findWithListingById(r.getId())).thenReturn(Optional.of(r));
+
+        assertThat(service.adminCollect(r.getId()).status()).isEqualTo(ReservationStatus.COLLECTED);
+        assertThatThrownBy(() -> service.adminCollect(r.getId())).hasFieldOrPropertyWithValue("code", "RESERVATION_NOT_ACTIVE");
+    }
+
+    @Test
+    void ownerOverridesRefuseReservationsThatAreNotWaiting() {
+        Reservation done = reserved(ReservationStatus.CANCELLED);
+        when(reservations.findWithListingById(done.getId())).thenReturn(Optional.of(done));
+
+        assertThatThrownBy(() -> service.adminCancel(done.getId())).hasFieldOrPropertyWithValue("code", "RESERVATION_NOT_CANCELLABLE");
+        verify(listings, never()).releasePortions(any(), org.mockito.ArgumentMatchers.anyInt());
     }
 }
