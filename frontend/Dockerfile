@@ -14,7 +14,7 @@ COPY . .
 RUN npm run build
 
 # ---- Stage 2: nginx serves the files and forwards /api to the backend -------------------------
-FROM nginx:1.27-alpine
+FROM nginx:1.31-alpine
 RUN rm /etc/nginx/conf.d/default.conf
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY nginx/security-headers.conf /etc/nginx/snippets/security-headers.conf
