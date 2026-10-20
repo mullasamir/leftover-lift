@@ -1,34 +1,55 @@
+# The whole app on your laptop with one command:
+#
+#   docker compose up --build
+#
+# then open http://localhost:8088 (change the port with WEB_PORT in .env).
+# Stop with Ctrl+C. `docker compose down` removes the containers but keeps your data;
+# add `-v` to wipe the database too.
+#
+# Your Eclipse + Vite setup keeps working as before: this stack publishes no ports except the website,
+# so it does not clash with PostgreSQL on 5432, the API on 8080 or Vite on 5173.
+
 services:
   db:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_DB: leftoverlift
       POSTGRES_USER: leftoverlift
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-leftoverlift}
-    ports:
-      - "5432:5432"
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data     # survives restarts and rebuilds
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U leftoverlift"]
+      test: ["CMD-SHELL", "pg_isready -U leftoverlift -d leftoverlift"]
       interval: 5s
       timeout: 3s
       retries: 10
 
   api:
     build: ./backend
+    restart: unless-stopped
     depends_on:
       db:
-        condition: service_healthy
+        condition: service_healthy          # wait until Postgres accepts connections
     environment:
       DB_URL: jdbc:postgresql://db:5432/leftoverlift
       DB_USER: leftoverlift
-      DB_PASSWORD: ${DB_PASSWORD:-leftoverlift}
-      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env (openssl rand -base64 48)}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      CORS_ALLOWED_ORIGINS: http://localhost:${WEB_PORT:-8088}
+      SERVER_FORWARD_HEADERS_STRATEGY: native   # trust X-Forwarded-For from our own proxy (used by the contact rate limit)
+    # No `ports:` on purpose: only the web container can reach the API, over the private compose network.
+
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy          # nginx needs to resolve the api host when it starts
     ports:
-      - "8080:8080"
-    profiles: ["full"]   # `docker compose --profile full up` runs the API in a container too
+      - "${WEB_PORT:-8088}:80"
 
 volumes:
   pgdata:

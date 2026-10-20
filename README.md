@@ -1,31 +1,60 @@
 # Leftover Lift
 
+![CI](https://github.com/mullasamir/leftover-lift/actions/workflows/ci.yml/badge.svg)
+
 A food-rescue marketplace. Bakeries, cafés and kitchens post surplus food at the end of the day; neighbours rescue it at a fraction of the price before a countdown runs out.
 
 **Stack:** Java 21, Spring Boot 3.5, Spring Security (JWT), PostgreSQL, Flyway, React 18 + Vite (plain CSS, no UI kit).
 
-## Run it
+## Run it for development
 
-You need Java 21, Maven 3.9+, Node 20+ and Docker.
+You need Java 21, Maven 3.9+, Node 20+ and a local PostgreSQL. (No installs? Skip to **Run everything with Docker** below.)
+
+```sql
+-- once, in psql or pgAdmin
+CREATE USER leftoverlift WITH PASSWORD 'leftoverlift';
+CREATE DATABASE leftoverlift OWNER leftoverlift;
+CREATE DATABASE leftoverlift_test OWNER leftoverlift;   -- only for the concurrency test
+```
 
 ```bash
-# 1. Database
-docker compose up -d db
-
-# 2. API (http://localhost:8080, Swagger UI at /swagger-ui.html)
+# API (http://localhost:8080, Swagger UI at /swagger-ui.html)
 cd backend
 mvn spring-boot:run
 
-# 3. Web app (http://localhost:5173)
+# Web app (http://localhost:5173)
 cd frontend
 npm install
 npm run dev
 ```
 
-Defaults work out of the box for local development. For anything shared or deployed, copy `.env.example` to `.env`
-and set a real `JWT_SECRET` (`openssl rand -base64 48`) and `DB_PASSWORD`.
+The defaults in `application.yml` match the database above. Run the tests with `cd backend && mvn test`.
 
-Run the tests: `cd backend && mvn test`
+## Run everything with Docker
+
+Needs Docker Desktop (on Windows it uses WSL 2). No Java, Maven, Node or PostgreSQL install required.
+
+```powershell
+copy .env.example .env
+# open .env and set DB_PASSWORD and JWT_SECRET. To generate a secret in PowerShell:
+#   $b = New-Object byte[] 48; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); [Convert]::ToBase64String($b)
+docker compose up --build
+```
+
+Open http://localhost:8088. The stack is three containers on a private network: PostgreSQL, the Spring Boot API, and nginx
+serving the React app and forwarding `/api` to the API. Only the website port is published. Stop it with Ctrl+C;
+`docker compose down -v` also deletes the database volume.
+
+Your normal Eclipse + `npm run dev` workflow still works; it does not conflict with this stack.
+See [docs/DEVOPS.md](docs/DEVOPS.md) for how each piece works and exercises to try.
+
+### Continuous integration
+
+`.github/workflows/ci.yml` runs on every push and pull request: the backend tests against a real PostgreSQL (including the
+concurrency test) and the frontend build. When a change reaches `main` and the checks pass, it builds the API and web images
+and publishes them to GitHub's container registry as `ghcr.io/<owner>/leftover-lift-api` and `leftover-lift-web`, tagged `latest`
+and with the commit hash. `docker-compose.prod.yml` and the `Caddyfile` are the production setup (HTTPS included) for the
+server step.
 
 ## Project layout
 

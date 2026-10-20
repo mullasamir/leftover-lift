@@ -1,0 +1,65 @@
+# Production stack for a server (used in the deployment step). Differences from docker-compose.yml:
+#  - it pulls prebuilt images from GitHub's container registry instead of building them,
+#  - Caddy fronts everything and gets free HTTPS certificates automatically,
+#  - nothing but ports 80 and 443 is reachable from the internet.
+#
+#   docker compose -f docker-compose.prod.yml --env-file .env pull
+#   docker compose -f docker-compose.prod.yml --env-file .env up -d
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on: [web]
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in .env, for example leftoverlift.example.com}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data                     # certificates live here, so keep this volume
+      - caddy_config:/config
+
+  web:
+    image: ghcr.io/${GHCR_OWNER:?Set GHCR_OWNER in .env}/leftover-lift-web:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+
+  api:
+    image: ghcr.io/${GHCR_OWNER}/leftover-lift-api:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/leftoverlift
+      DB_USER: leftoverlift
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      CORS_ALLOWED_ORIGINS: https://${DOMAIN}
+      SERVER_FORWARD_HEADERS_STRATEGY: native
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: leftoverlift
+      POSTGRES_USER: leftoverlift
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U leftoverlift -d leftoverlift"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

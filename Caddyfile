@@ -1,0 +1,6 @@
+# Caddy obtains and renews a free Let's Encrypt certificate for {$DOMAIN} by itself.
+# Point the domain's DNS A record at this server first.
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy web:80
+}
