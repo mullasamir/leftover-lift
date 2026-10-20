@@ -14,6 +14,7 @@ import com.leftoverlift.listing.ListingRepository;
 import com.leftoverlift.reservation.ReservationRepository;
 import com.leftoverlift.user.VendorProfileRepository;
 import java.time.Clock;
+import com.leftoverlift.config.CorsProperties;
 import com.leftoverlift.user.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /** Proves the role rules in SecurityConfig and the @PreAuthorize annotations actually hold. */
 @WebMvcTest(controllers = {AdminController.class, VendorListingController.class, ListingController.class,
         ReservationController.class, VendorReservationController.class, PublicStatsController.class})
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, CorsProperties.class})
 class RoleAccessTest {
 
     @Autowired MockMvc mvc;
