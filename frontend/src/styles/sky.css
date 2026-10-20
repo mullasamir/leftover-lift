@@ -1,12 +1,11 @@
-/*
-  The sky. JavaScript only writes one number, --p (0 at the top of the page, 1 at the bottom).
-  Everything else (colour, sun, clouds, drifting fruit) is pure CSS reacting to it.
-  It stays bright the whole way: morning blue, sunny yellow, peach, then a pink sunset.
+﻿/*
+  The Sky — Subtle Ambient Lighting System.
+  Adapts smoothly to scroll progress (--p) with clean, soft, airy eco gradients.
 */
 .sky {
   position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
-  --orb: clamp(84px, 13vw, 150px);
-  background: linear-gradient(180deg, #bfeaff 0%, #fff4c4 30%, #ffdcae 58%, #ffc6d8 84%, #ffe6f0 100%);
+  --orb: clamp(100px, 16vw, 220px);
+  background: linear-gradient(180deg, #f0fdf4 0%, #f8fafc 30%, #fffbeb 65%, #fdf2f8 85%, #f0fdf4 100%);
   background-size: 100% 400%;
   background-position: 0 calc(var(--p, 0) * 100%);
 }
@@ -15,47 +14,56 @@
   position: absolute; width: var(--orb); height: var(--orb); border-radius: 50%; will-change: left, top;
   left: calc(12% + var(--p, 0) * 66%);
   top: calc(7% + var(--p, 0) * 56%);
-  background: radial-gradient(circle at 35% 32%, #fffbd0, #ffd23a 55%, #ffae2b);
-  box-shadow: 0 0 0 calc(var(--orb) * 0.14) rgba(255, 206, 46, 0.3), 0 0 calc(var(--orb) * 0.9) rgba(255, 190, 60, 0.6);
+  background: radial-gradient(circle at 40% 40%, rgba(254, 240, 138, 0.5) 0%, rgba(245, 158, 11, 0.18) 55%, transparent 75%);
+  box-shadow: 0 0 calc(var(--orb) * 0.75) rgba(245, 158, 11, 0.25);
+  filter: blur(8px);
 }
 
 .sky__cloud {
-  position: absolute; left: 0; height: 2.4rem; width: 8rem; border-radius: 999px; background: rgba(255, 255, 255, 0.8);
-  animation: drift 120s linear infinite; animation-delay: var(--delay, 0s);
+  position: absolute; left: 0; height: 2.2rem; width: 7.5rem; border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(4px);
+  animation: drift 140s linear infinite; animation-delay: var(--delay, 0s);
 }
 .sky__cloud::before, .sky__cloud::after { content: ''; position: absolute; background: inherit; border-radius: 50%; }
-.sky__cloud::before { width: 3.4rem; height: 3.4rem; left: 1.2rem; top: -1.5rem; }
-.sky__cloud::after { width: 2.6rem; height: 2.6rem; left: 4rem; top: -1rem; }
+.sky__cloud::before { width: 3.2rem; height: 3.2rem; left: 1.1rem; top: -1.3rem; }
+.sky__cloud::after { width: 2.4rem; height: 2.4rem; left: 3.8rem; top: -0.9rem; }
 .sky__cloud--a { top: 16%; --delay: -20s; }
-.sky__cloud--b { top: 34%; --delay: -70s; transform: scale(1.4); animation-duration: 160s; }
-.sky__cloud--c { top: 52%; --delay: -100s; transform: scale(0.8); animation-duration: 100s; }
-@keyframes drift { from { translate: -20vw 0; } to { translate: 115vw 0; } }
+.sky__cloud--b { top: 34%; --delay: -70s; transform: scale(1.3); animation-duration: 180s; }
+.sky__cloud--c { top: 52%; --delay: -100s; transform: scale(0.8); animation-duration: 120s; }
+@keyframes drift { from { transform: translateX(-20vw); } to { transform: translateX(115vw); } }
 
-/* Fruit and veg doodles that float up or down at different speeds as you scroll (parallax) */
+/* Fruit and veg floating elements */
 .sky__doodle {
-  position: absolute; width: clamp(2.6rem, 5vw, 4rem); opacity: 0.9;
+  position: absolute; width: clamp(2.4rem, 4.5vw, 3.6rem); opacity: 0.75;
   left: var(--x); top: var(--y);
-  translate: 0 calc(var(--p, 0) * var(--drift, -120px));
-  rotate: calc(var(--p, 0) * var(--spin, 90deg));
-  filter: drop-shadow(0 4px 0 rgba(20, 52, 43, 0.12));
+  transform: translateY(calc(var(--p, 0) * var(--drift, -120px))) rotate(calc(var(--p, 0) * var(--spin, 90deg)));
+  filter: drop-shadow(0 4px 12px rgba(15, 23, 42, 0.06));
 }
 .sky__doodle svg { display: block; width: 100%; height: auto; }
-/* They live in the page margins, so only show them when the screen is wide enough to have margins. */
 @media (max-width: 74.99rem) { .sky__doodle { display: none; } }
 
 @media (prefers-reduced-motion: reduce) { .sky__cloud { animation: none; } }
 
-/* Floating clock that follows the sky */
+/* Floating Time Capsule */
 .sky-clock {
-  position: fixed; left: 1.25rem; bottom: 1.25rem; z-index: 20; pointer-events: none;
-  display: none; align-items: center; gap: 0.55rem; padding: 0.45rem 0.9rem 0.45rem 0.7rem;
-  background: rgba(255, 254, 250, 0.95); border: 2px solid var(--ink); border-radius: 999px;
-  font-size: 0.82rem; line-height: 1.2; box-shadow: 0 4px 0 rgba(20, 52, 43, 0.2);
+  position: fixed; left: 1.5rem; bottom: 1.5rem; z-index: 30; pointer-events: none;
+  display: none; align-items: center; gap: 0.65rem; padding: 0.5rem 1.1rem 0.5rem 0.85rem;
+  background: rgba(255, 255, 255, 0.88);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border: 1px solid var(--line); border-radius: 999px;
+  font-size: 0.82rem; line-height: 1.2;
+  box-shadow: var(--shadow-md);
+  color: var(--ink);
 }
-.sky-clock strong { font-family: var(--font-display); font-weight: 700; font-size: 1rem; }
-.sky-clock__dot { width: 0.65rem; height: 0.65rem; border-radius: 50%; background: var(--tomato); animation: pulse 1.6s ease-in-out infinite; }
-.sky-clock__mood { color: var(--ink-soft); }
-/* On phones the chip would cover cards and buttons, and the sky already tells the story. */
+.sky-clock strong { font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; color: var(--leaf-deep); }
+.sky-clock__dot {
+  width: 0.65rem; height: 0.65rem; border-radius: 50%;
+  background: var(--leaf);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+.sky-clock__mood { color: var(--ink-soft); font-weight: 500; }
 @media (min-width: 48rem) { .sky-clock { display: inline-flex; } }
-@keyframes pulse { 50% { transform: scale(1.5); opacity: 0.5; } }
+@keyframes pulse { 50% { transform: scale(1.4); opacity: 0.5; } }
 @media (prefers-reduced-motion: reduce) { .sky-clock__dot { animation: none; } }

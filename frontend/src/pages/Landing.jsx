@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api/client.js'
 import { toCardListing } from '../api/adapters.js'
@@ -149,7 +149,7 @@ export default function Landing() {
               Tuesday, so shops cook and bake for the customers they hope to have, and what is left at closing time usually goes in the bin.
             </p>
             <p>
-              That food took land, water, fuel and someone’s early morning to make. When it ends up in a landfill it rots and releases
+              That food took land, water, fuel and someone's early morning to make. When it ends up in a landfill it rots and releases
               methane, a greenhouse gas far stronger than carbon dioxide. Worldwide, about a third of the food we produce is never eaten.
             </p>
             <p>
@@ -193,7 +193,7 @@ export default function Landing() {
             <Link to="/discover" className="btn btn--ghost">See everything nearby</Link>
           </>
         ) : live.phase === 'loading' ? (
-          <p className="loading" role="status">Looking for food…</p>
+          <p className="loading" role="status">Looking for food...</p>
         ) : (
           <div className="empty">
             <h3>No food listed right now</h3>
@@ -206,34 +206,113 @@ export default function Landing() {
         )}
       </section>
 
-      {/* ---------- Two ways in ---------- */}
+      {/* ---------- Two ways in (Which side of the counter are you on?) ---------- */}
       <section className="page paths" aria-labelledby="paths-title">
-        <Reveal className="panel panel--tight"><h2 id="paths-title">Which side of the counter are you on?</h2></Reveal>
+        <div className="paths__header">
+          <span className="paths__badge">
+            <span className="badge-pulse"></span>
+            Two Ways to Join the Movement
+          </span>
+          <h2 id="paths-title">Which side of the counter are you on?</h2>
+          <p className="paths__sub">
+            Whether you want to rescue incredible surplus meals at 70% off or cut kitchen waste into pure margin, Leftover Lift is built for you.
+          </p>
+        </div>
+
         <div className="paths__grid">
+          {/* Consumer / Eater Path */}
           <Reveal variant="deal" className="pathcard pathcard--eat">
-            <div className="pathcard__art"><FoodScene markup={SCENES.meals} /></div>
-            <h3>I want to rescue food</h3>
-            <ul>
-              <li>Fresh food from places you already love</li>
-              <li>Pay at the counter, cancel any time</li>
-              <li>Grow a little tree and earn badges</li>
-            </ul>
-            <div className="pathcard__actions">
-              <JoinButton className="btn">Join as a customer</JoinButton>
-              <Link to="/how-it-works" className="btn btn--ghost">How it works</Link>
+            <div className="pathcard__pill">
+              <span>🥗 For Hungry Foodies & Savers</span>
+              <span className="pathcard__tag">Save Up to 70%</span>
+            </div>
+
+            <div className="pathcard__art">
+              <FoodScene markup={SCENES.meals} />
+            </div>
+
+            <div className="pathcard__content">
+              <h3>I want to rescue food</h3>
+              <p className="pathcard__summary">
+                Get high-quality meals, artisan bread, and fresh groceries from your favourite local spots before closing time.
+              </p>
+
+              <ul className="pathcard__features">
+                <li>
+                  <span className="pfeat-icon pfeat-icon--leaf"><Check /></span>
+                  <div>
+                    <strong>Fresh food from top local kitchens</strong>
+                    <span>Delicious surplus from spots you love at a fraction of menu price</span>
+                  </div>
+                </li>
+                <li>
+                  <span className="pfeat-icon pfeat-icon--leaf"><Check /></span>
+                  <div>
+                    <strong>Zero subscription & cancel anytime</strong>
+                    <span>Reserve in 2 clicks, pay securely, and pickup during closing hours</span>
+                  </div>
+                </li>
+                <li>
+                  <span className="pfeat-icon pfeat-icon--leaf"><Check /></span>
+                  <div>
+                    <strong>Track your environmental savings</strong>
+                    <span>Grow your virtual forest, earn badges, and watch your CO₂ counter drop</span>
+                  </div>
+                </li>
+              </ul>
+
+              <div className="pathcard__actions">
+                <JoinButton className="btn">Join as a customer &rarr;</JoinButton>
+                <Link to="/how-it-works" className="btn btn--ghost">How it works</Link>
+              </div>
             </div>
           </Reveal>
+
+          {/* Business / Vendor Path */}
           <Reveal variant="deal" delay={120} className="pathcard pathcard--sell">
-            <div className="pathcard__art"><FoodScene markup={SCENES.bakery} /></div>
-            <h3>I run a food business</h3>
-            <ul>
-              <li>Post leftovers in under a minute</li>
-              <li>The discount is worked out for you</li>
-              <li>Track your impact and share it</li>
-            </ul>
-            <div className="pathcard__actions">
-              <JoinButton role="VENDOR" className="btn btn--accent">Join as a business</JoinButton>
-              <Link to="/for-businesses" className="btn btn--ghost">See the benefits</Link>
+            <div className="pathcard__pill">
+              <span>💼 For Cafés, Bakeries & Restaurants</span>
+              <span className="pathcard__tag pathcard__tag--amber">Recover Revenue</span>
+            </div>
+
+            <div className="pathcard__art">
+              <FoodScene markup={SCENES.bakery} />
+            </div>
+
+            <div className="pathcard__content">
+              <h3>I run a food business</h3>
+              <p className="pathcard__summary">
+                Turn evening surplus into revenue, lower disposal fees, and attract new loyal customers right into your shop.
+              </p>
+
+              <ul className="pathcard__features">
+                <li>
+                  <span className="pfeat-icon pfeat-icon--amber"><Check /></span>
+                  <div>
+                    <strong>Post surplus in under 60 seconds</strong>
+                    <span>Quick mobile listing before closing — no complex inventory setup needed</span>
+                  </div>
+                </li>
+                <li>
+                  <span className="pfeat-icon pfeat-icon--amber"><Check /></span>
+                  <div>
+                    <strong>Automatic smart discounting</strong>
+                    <span>Surprise bag pricing and pickup slots are generated automatically</span>
+                  </div>
+                </li>
+                <li>
+                  <span className="pfeat-icon pfeat-icon--amber"><Check /></span>
+                  <div>
+                    <strong>Attract new foot-traffic daily</strong>
+                    <span>Over 65% of rescue customers buy additional full-price items at pickup</span>
+                  </div>
+                </li>
+              </ul>
+
+              <div className="pathcard__actions">
+                <JoinButton role="VENDOR" className="btn btn--accent">Partner your kitchen &rarr;</JoinButton>
+                <Link to="/for-businesses" className="btn btn--ghost">See business benefits</Link>
+              </div>
             </div>
           </Reveal>
         </div>
