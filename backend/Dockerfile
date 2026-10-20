@@ -2,7 +2,7 @@
 
 # ---- Stage 1: build the jar ------------------------------------------------------------------
 # Maven and the JDK are only needed to build. They never reach the final image.
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM maven:3.9-eclipse-temurin-26 AS build
 WORKDIR /app
 
 # Copy the dependency list first. Docker caches each step, so as long as pom.xml is unchanged the
