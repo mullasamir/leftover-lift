@@ -16,7 +16,7 @@ RUN --mount=type=cache,target=/root/.m2 mvn -q -B package -Dmaven.test.skip=true
 
 # ---- Stage 2: the small runtime image --------------------------------------------------------
 # A JRE on Alpine is a fraction of the size of the JDK image and has `wget` for the health check.
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 
 # Never run as root inside a container.
